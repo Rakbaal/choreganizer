@@ -1,7 +1,7 @@
 ---
 type: milestone
 milestone: M0
-status: todo
+status: in-progress
 done-when: An empty app is live on a URL and you can sign up and sign in
 next: "[[M1 Apartments, rooms, members]]"
 tech-prep: "[[M0 Skeleton tech prep]]"
