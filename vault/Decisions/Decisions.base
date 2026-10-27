@@ -1,0 +1,24 @@
+filters:
+  and:
+    - file.inFolder("Decisions")
+    - type == "decision"
+views:
+  - type: table
+    name: All decisions
+    order:
+      - file.name
+      - status
+      - area
+      - date
+    sort:
+      - property: date
+        direction: ASC
+  - type: table
+    name: Open
+    filters:
+      and:
+        - status == "open"
+    order:
+      - file.name
+      - area
+      - date
