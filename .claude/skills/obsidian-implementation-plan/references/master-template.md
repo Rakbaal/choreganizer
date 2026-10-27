@@ -21,7 +21,7 @@ Part of [[<Milestone>]] · Tech prep: [[<Project> tech prep]]
 
 > [!info] Sources
 > - [[<Project> tech prep]] (validated YYYY-MM-DD) · or Claude session plan `~/.claude/plans/<slug>.md`, snapshot in [[<Project> source plan]]
-> - Lanterne chapters, Decision notes, branches in flight, vendor docs. One line each, each one a link.
+> - `Project/` notes, Decision notes, branches in flight, library docs. One line each, each one a link.
 
 <One short paragraph: what ships at the end, the slicing choice (how many stacks, which order) and why.>
 
@@ -36,14 +36,14 @@ Every decision, contract, validation and limit line starts with an ID, numbered 
 What checking the tech prep against current `origin/master` and the vault showed. Each item is **VERIFIED** (with `path:line`, commit or command) or **HYPOTHESIS**.
 - Stale references: a file or type renamed, moved or deleted since the tech prep.
 - Already done: parts merged or sitting on a branch.
-- Gaps: things the tech prep needs but doesn't mention (a migration, an `.env.example` line, embedded data, a Glossary term, a fake provider). The file list of `internal/campaign/` is a good checklist for a feature package.
-- Contradictions: tech prep vs milestone, tech prep vs a Decision or Lanterne note edited since, tech prep vs code.
+- Gaps: things the tech prep needs but doesn't mention (a migration, an `.env.example` line, a seed-script update, French copy, a `requireMembership` call, an owner-only check). The routes of `server/api/apartments/` (once M1 is merged) are a good checklist for a new resource.
+- Contradictions: tech prep vs milestone, tech prep vs a Decision or `Project/` note edited since, tech prep vs code.
 - Prerequisites: previous milestones or branches that must merge first.
 Write "Nothing found" rather than dropping the section.
 
 ## Implementation strategy
 - How the work is sliced and why this order: riskiest first, vertical slices.
-- How master stays working between stacks: "engine action not exposed as an LLM tool until Stack N", route unused, screen not linked.
+- How master stays working between stacks: route unused, screen not linked from the navigation, button hidden until Stack N. Master deploys to production, so this is what both of you see on your phones.
 - Data concerns: migrations, embedded data.
 - Any change from the tech prep's PR stack, with the reason.
 
@@ -52,11 +52,11 @@ Write "Nothing found" rather than dropping the section.
 ### Stack A — <one-sentence slice> · base `master` · <independent | needs Stack X merged>
 | Step | Branch | Concern |
 |---|---|---|
-| [[<Project> step 1\|1]] | `feat/backend/<slug>` | <one sentence> |
-| [[<Project> step 2\|2]] | `feat/backend/<slug>` | <one sentence> |
-| [[<Project> step 3\|3]] | `feat/frontend/<slug>` | <one sentence> |
+| [[<Project> step 1\|1]] | `feat/<slug>` | <one sentence> |
+| [[<Project> step 2\|2]] | `feat/<slug>` | <one sentence> |
+| [[<Project> step 3\|3]] | `feat/<slug>` | <one sentence> |
 
-**Master after this stack merges:** <what the table screen shows or doesn't, what is wired up.>
+**Master after this stack merges:** <what the deployed app shows or doesn't, what is wired up.>
 
 ### Stack B — …
 
@@ -78,7 +78,7 @@ Every requirement, decision, validation, limit of the tech prep and every Task o
 | <item> | — | Dropped | <reason, from the review> |
 
 ## End-to-end verification
-The manual scenario to run once the last stack is merged, usually the milestone's Exit: commands, the simulator run, the table-screen walkthrough.
+The manual scenario to run once the last stack is merged, usually the milestone's Done when: commands, then the walkthrough on both phones (or two browsers signed in as two users), and the Playwright happy path once it exists.
 
 ## 🔭 Out of scope
 Carried over from the tech prep, plus anything this plan defers. One line each, with where it lands (a later milestone, [[Post-MVP]]).

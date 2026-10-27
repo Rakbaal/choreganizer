@@ -1,0 +1,55 @@
+filters:
+  and:
+    - file.inFolder("Plans")
+views:
+  - type: table
+    name: Active steps
+    filters:
+      and:
+        - type == "plan-step"
+        - status != "done"
+    order:
+      - file.name
+      - status
+      - stack
+      - branch
+      - pr
+    sort:
+      - property: status
+        direction: DESC
+      - property: plan
+        direction: ASC
+      - property: step
+        direction: ASC
+  - type: table
+    name: All steps
+    filters:
+      and:
+        - type == "plan-step"
+    order:
+      - file.name
+      - status
+      - stack
+      - branch
+      - base
+      - pr
+    sort:
+      - property: plan
+        direction: ASC
+      - property: step
+        direction: ASC
+  - type: table
+    name: Tech preps and plans
+    filters:
+      or:
+        - type == "tech-prep"
+        - type == "plan"
+    order:
+      - file.name
+      - type
+      - status
+      - milestone
+      - date
+    sort:
+      - property: date
+        direction: DESC

@@ -1,6 +1,6 @@
 ---
 name: obsidian-prepare-step
-description: Get one step of a Web Wizard implementation plan (Obsidian vault, vault/Plans/<Project>/) ready to build, without building it. Details a light step against the real code, settles its blocking open questions with Leo, checks its prerequisites and the contracts it consumes, sets the step to ready and commits the vault notes. Ends by handing over to a fresh session running /obsidian-implement-step. Use when asked to "prepare step N", "settle the open questions of step N", "is step N ready?", or /obsidian-prepare-step in web-wizard. Not for writing a plan (obsidian-implementation-plan), building (obsidian-implement-step) or reconciling (obsidian-step-done).
+description: Get one step of a Choreganizer implementation plan (Obsidian vault, vault/Plans/<Project>/) ready to build, without building it. Details a light step against the real code, settles its blocking open questions with Leo, checks its prerequisites and the contracts it consumes, sets the step to ready and commits the vault notes. Ends by handing over to a fresh session running /obsidian-implement-step. Use when asked to "prepare step N", "settle the open questions of step N", "is step N ready?", or /obsidian-prepare-step in choreganizer. Not for writing a plan (obsidian-implementation-plan), building (obsidian-implement-step) or reconciling (obsidian-step-done).
 argument-hint: "[step note name or path | step number] [project]"
 model: opus
 ---
@@ -20,11 +20,11 @@ Plans live in `vault/Plans/<Project>/` (master + `Steps/`), written by `obsidian
 1. Find the step note: a name or path; a number plus a project (ask if several plans have that step); or the note whose `branch:` property is the current branch (vault conventions, *Finding the current step*). With nothing given, offer the first step of `Plans.base` that is not `ready` or later.
 2. Read from disk the step note, the master, and the earlier steps this one `Consumes` from. Never work from an in-context copy.
 3. Read its properties: `branch`, `base`, `stack`, `status`. A step already `in-progress` or later: say so and ask what Leo wants.
-4. `git -C /home/leo-carpentier/dev/web-wizard fetch origin`. Find the code to detail against: `origin/<base>` if it exists, else the local `<base>` branch. Read code with `git show <ref>:<path>`; don't switch branches.
+4. `git -C /home/leo-carpentier/dev/choreganizer fetch origin`. Find the code to detail against: `origin/<base>` if it exists, else the local `<base>` branch. Read code with `git show <ref>:<path>`; don't switch branches.
 
 ## Phase 2 — Detail a light step
 
-If `Changes`, `Tests`, `Verification` or `Standalone check` still holds the placeholder `_Detailed when the step starts…_`, write them from the step template (`.claude/skills/obsidian-implementation-plan/references/step-template.md`) against the code found in Phase 1.4: real paths, real type and function names, the Lanterne sections each rule implements. Mark anything not yet on the base.
+If `Changes`, `Tests`, `Verification` or `Standalone check` still holds the placeholder `_Detailed when the step starts…_`, write them from the step template (`.claude/skills/obsidian-implementation-plan/references/step-template.md`) against the code found in Phase 1.4: real paths, real type and function names, the vault section or Decision note each rule implements. Mark anything not yet on the base.
 
 Checkpoint commit first, then the result commit `prepare-step: <Project> step <N> detailed`.
 
@@ -33,7 +33,7 @@ Checkpoint commit first, then the result commit `prepare-step: <Project> step <N
 Collect them all before asking anything, then settle them in one round.
 
 - **Open questions.** Master ❓ items not struck through that name this step. `Risks / open points` lines pointing to one or saying "settle before…". `Changes` items that hedge ("A or B", "TBD", "?"). Decision notes the step relies on that are still `status: open`.
-- **Rules gaps.** A rule the step implements that the Lanterne chapter leaves ambiguous, or a number listed in [[Playtest questions]] that the step hard-codes instead of keeping in data.
+- **Design gaps.** A rule the step implements that the `Project/` notes leave ambiguous or contradict each other on (an error message, a permission, a limit), or user-visible French copy nobody chose.
 - **Missing prerequisites.** The base branch must exist. If `base` is an earlier step's branch, every step it depends on must have its branch pushed. A missing branch is not something to settle here: report it and stop.
 - **Stale assumptions.** Grep the step's `Consumes` lines on the base. A signature that no longer matches is a question.
 

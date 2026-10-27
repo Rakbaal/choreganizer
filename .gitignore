@@ -1,0 +1,27 @@
+# Secrets / local config
+.env
+*.local
+
+# Nuxt / Node
+node_modules/
+.nuxt/
+.output/
+.data/
+dist/
+.cache/
+
+# Editors / OS
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+
+# Obsidian (per-machine UI state)
+vault/.obsidian/workspace.json
+vault/.obsidian/workspace-mobile.json
+vault/.obsidian/plugins
+vault/.obsidian/community-plugins.json
+vault/.obsidian/graph.json
+
+# Workflow plans stay local (see .claude/skills/obsidian-tech-prep/references/vault-conventions.md)
+vault/Plans
