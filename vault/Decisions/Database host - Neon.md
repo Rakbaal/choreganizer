@@ -1,6 +1,6 @@
 ---
 type: decision
-status: recommended
+status: decided
 date: 2026-10-27
 area: tech
 tags:
