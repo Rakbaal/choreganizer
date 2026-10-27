@@ -4,6 +4,7 @@ milestone: M0
 status: todo
 done-when: An empty app is live on a URL and you can sign up and sign in
 next: "[[M1 Apartments, rooms, members]]"
+tech-prep: "[[M0 Skeleton tech prep]]"
 tags:
   - milestone
 ---
@@ -11,6 +12,8 @@ tags:
 # M0 — Skeleton
 
 Part of [[Roadmap]] · next [[M1 Apartments, rooms, members]] →
+
+Tech prep: [[M0 Skeleton tech prep]] · Plan: _not yet_
 
 ## Tasks
 
