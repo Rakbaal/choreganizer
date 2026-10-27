@@ -1,17 +1,25 @@
 # Secrets / local config
 .env
+.env.*
+!.env.example
 *.local
 
 # Nuxt / Node
 node_modules/
 .nuxt/
+.nitro/
 .output/
 .data/
 dist/
 .cache/
 
+# Logs
+logs/
+*.log
+
 # Editors / OS
 .idea/
+.fleet/
 .vscode/*
 !.vscode/extensions.json
 .DS_Store
