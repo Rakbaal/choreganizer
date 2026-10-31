@@ -22,6 +22,7 @@
     "@vercel/functions": "^3.10.5",
     "better-auth": "^1.7.14",
     "drizzle-orm": "^0.45.4",
+    "h3": "^1.15.11",
     "nuxt": "^4.6.2",
     "pg": "^8.23.1",
     "tailwindcss": "^4.3.3",
@@ -35,6 +36,7 @@
     "auth": "1.7.14",
     "drizzle-kit": "^0.31.11",
     "eslint": "^10.13.0",
+    "tsx": "^4.23.15",
     "typescript": "^6.0.3",
     "vitest": "^5.0.5",
     "vue-tsc": "^3.3.13"
