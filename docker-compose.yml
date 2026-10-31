@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: choreganizer
+      POSTGRES_PASSWORD: choreganizer
+      POSTGRES_DB: choreganizer
+    # Host port 5433: 5432 is often taken by a system Postgres.
+    ports:
+      - '5433:5432'
+    volumes:
+      # postgres:18 keeps its data under /var/lib/postgresql/18/docker, so the volume mounts the parent.
+      - postgres-data:/var/lib/postgresql
+
+volumes:
+  postgres-data:

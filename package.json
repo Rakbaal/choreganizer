@@ -12,17 +12,24 @@
     "lint": "eslint .",
     "typecheck": "nuxt typecheck",
     "test": "vitest run --passWithNoTests",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
     "@nuxt/ui": "^4.12.0",
+    "@vercel/functions": "^3.10.5",
+    "drizzle-orm": "^0.45.4",
     "nuxt": "^4.6.2",
+    "pg": "^8.23.1",
     "tailwindcss": "^4.3.3",
     "vue": "^3.5.44",
     "vue-router": "^5.4.0"
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.17.0",
+    "@types/pg": "^8.23.1",
+    "drizzle-kit": "^0.31.11",
     "eslint": "^10.13.0",
     "typescript": "^6.0.3",
     "vitest": "^5.0.5",
