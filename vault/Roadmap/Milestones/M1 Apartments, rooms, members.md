@@ -5,6 +5,7 @@ status: todo
 done-when: You create the flat, add its rooms, and your girlfriend joins with a code
 previous: "[[M0 Skeleton]]"
 next: "[[M2 Tasks]]"
+tech-prep: "[[M1 Apartments, rooms, members tech prep]]"
 tags:
   - milestone
 ---
@@ -12,6 +13,8 @@ tags:
 # M1 — Apartments, rooms, members
 
 Part of [[Roadmap]] · ← [[M0 Skeleton]] · next [[M2 Tasks]] →
+
+Tech prep: [[M1 Apartments, rooms, members tech prep]]
 
 ## Tasks
 
