@@ -1,7 +1,7 @@
 ---
 type: milestone
 milestone: M1
-status: todo
+status: in-progress
 done-when: You create the flat, add its rooms, and your girlfriend joins with a code
 previous: "[[M0 Skeleton]]"
 next: "[[M2 Tasks]]"
