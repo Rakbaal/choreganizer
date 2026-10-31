@@ -35,6 +35,19 @@ The app runs on http://localhost:3000. Postgres 18 runs in Docker on port 5433 (
 
 CI runs `lint`, `typecheck` and `test` on every pull request and on pushes to `master`.
 
+## Tests
+
+`pnpm test` runs Vitest against a real Postgres: the `choreganizer_test` database in the same Docker container, never the dev one. Each run applies the migrations to it and truncates it.
+
+- `TEST_DATABASE_URL` must be set in `.env` (copy the line from `.env.example`); without it the tests stop instead of touching `DATABASE_URL`.
+- A fresh volume gets the database from `docker/initdb/`. For a volume created before it existed, create it once:
+
+```bash
+docker compose exec postgres createdb -U choreganizer choreganizer_test
+```
+
+CI runs the same tests against a Postgres service (`.github/workflows/ci.yml`).
+
 ## Deployment
 
 - **Vercel** deploys `master` to production and every other pushed branch to a preview (previews sit behind Vercel's login). Functions run in `lhr1` (London), next to the database.

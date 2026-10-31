@@ -11,6 +11,8 @@ services:
     volumes:
       # postgres:18 keeps its data under /var/lib/postgresql/18/docker, so the volume mounts the parent.
       - postgres-data:/var/lib/postgresql
+      # Creates the test database; Postgres runs these scripts only when the volume is empty.
+      - ./docker/initdb:/docker-entrypoint-initdb.d:ro
 
 volumes:
   postgres-data:
