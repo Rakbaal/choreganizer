@@ -2,7 +2,7 @@
 import { authClient } from '~/lib/auth-client'
 
 // Same cache key as the middleware: no second request.
-const { data: session } = await authClient.useSession(useFetch)
+const { data: session } = await useAuthSession()
 
 async function signOut() {
   await authClient.signOut()
