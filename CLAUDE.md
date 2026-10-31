@@ -21,7 +21,9 @@ This repo uses the Obsidian versions of the workflow skills. They replace the No
 4. `obsidian-implement-step`, in a fresh session in auto mode (it holds its plan for approval in plan mode only when the step is stale or risky; start in plan mode to force it) → one branch + draft PR per step, stacked with gh stack
 5. `obsidian-step-done` → reconcile the plan with the branch before the PR leaves draft
 
-Conventions for those notes (properties, links, branches, vault commits) are in `.claude/skills/obsidian-tech-prep/references/vault-conventions.md`. The step being implemented is the one whose `branch:` property is the current branch; its `## Deviations` section takes the global deviation-log lines.
+Conventions for those notes (properties, links, branches, vault commits) are in `.claude/skills/obsidian-tech-prep/references/vault-conventions.md`.
+
+When local `master` is ahead of `origin/master` (usually the vault commit `obsidian-step-done` leaves), cut a step branch based on `master` from local `master`, not `origin/master`, without asking: those commits ship in that step's PR. The step being implemented is the one whose `branch:` property is the current branch; its `## Deviations` section takes the global deviation-log lines.
 
 ## Product rules
 - Logging a chore takes **two taps on a phone**. Anything on the logging path that adds a tap, a required field or a wait is a bug. Defaults do the work: done by me, done now.
