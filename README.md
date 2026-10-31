@@ -12,8 +12,9 @@ A shared chore log for two people: who did which chore, in which room, when. The
 
 ```bash
 pnpm install
-cp .env.example .env
+cp .env.example .env   # then fill BETTER_AUTH_SECRET: openssl rand -base64 32
 docker compose up -d
+pnpm db:migrate
 pnpm dev
 ```
 
@@ -30,6 +31,7 @@ The app runs on http://localhost:3000. Postgres 18 runs in Docker on port 5433 (
 | `pnpm test` | Vitest, once |
 | `pnpm db:generate` | Generate a SQL migration from the Drizzle schema (`server/database/schema/`) into `server/database/migrations/` |
 | `pnpm db:migrate` | Apply pending migrations to the database in `DATABASE_URL` |
+| `pnpm db:auth-schema` | Regenerate Better Auth's tables (`server/database/schema/auth.ts`) after changing its config in `server/utils/auth.ts`, then the migration |
 
 CI runs `lint`, `typecheck` and `test` on every pull request and on pushes to `master`.
 
@@ -38,3 +40,5 @@ CI runs `lint`, `typecheck` and `test` on every pull request and on pushes to `m
 - **Vercel** deploys `master` to production and every other pushed branch to a preview (previews sit behind Vercel's login). Functions run in `lhr1` (London), next to the database.
 - **Neon** hosts Postgres 18 in London. The Neon-managed Vercel integration creates a database branch `preview/<git-branch>` for each preview and deletes it once the git branch is merged or deleted.
 - The integration sets `DATABASE_URL` (pooled) and `DATABASE_URL_UNPOOLED` (direct, used by `drizzle-kit`) on every deployment: nothing to configure by hand for the database.
+- The build runs `pnpm db:migrate` before `pnpm build` (`vercel.json`), so each preview migrates its own Neon branch and production migrates `production`.
+- `BETTER_AUTH_SECRET` is set by hand in Vercel's environment variables, with a different value for Production and Preview.
