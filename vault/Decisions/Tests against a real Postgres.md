@@ -25,7 +25,7 @@ The rules are SQL (a membership lookup, eligible rooms, same-apartment checks): 
 
 - CI gets a Postgres service ([[M1 Apartments, rooms, members]]); M3's log-creation tests reuse the harness
 - Tests that need a session or an `event` aren't written; the 401 path stays `requireUser`'s
-- Where the local test database lives: [[M1 Apartments, rooms, members tech prep#❓ Open questions]]
+- Locally, a second database `choreganizer_test` in the Docker container, read from `TEST_DATABASE_URL` ([[M1 Apartments, rooms, members tech prep#Tests]])
 
 ## Related
 

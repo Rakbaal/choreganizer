@@ -46,7 +46,7 @@ If the last owner leaves while someone remains, that person is promoted to owner
 
 ## Invites
 
-- Code: `nanoid(12)`, shared as a `/join/<code>` link; 12 random characters make guessing impractical, so no rate limiting needed
+- Code: 12 URL-safe characters, `randomBytes(9).toString('base64url')` from `node:crypto` (same as `nanoid(12)`, no dependency; [[M1 Apartments, rooms, members tech prep#Invites]]), shared as a `/join/<code>` link; 12 random characters make guessing impractical, so no rate limiting needed
 - Valid for 7 days, single use: setting `used_at`/`used_by` and inserting the membership happen in one transaction
 - Already a member → redirect to the apartment; expired or used → clear error page
 
