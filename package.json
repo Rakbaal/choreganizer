@@ -15,7 +15,8 @@
     "postinstall": "nuxt prepare",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:auth-schema": "auth generate --config server/utils/auth.ts --output server/database/schema/auth.ts --yes && drizzle-kit generate"
+    "db:auth-schema": "auth generate --config server/utils/auth.ts --output server/database/schema/auth.ts --yes && drizzle-kit generate",
+    "db:seed": "tsx --env-file=.env scripts/seed.ts"
   },
   "dependencies": {
     "@nuxt/ui": "^4.12.0",

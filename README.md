@@ -15,10 +15,13 @@ pnpm install
 cp .env.example .env   # then fill BETTER_AUTH_SECRET: openssl rand -base64 32
 docker compose up -d
 pnpm db:migrate
+pnpm db:seed   # optional: test users and an apartment
 pnpm dev
 ```
 
 The app runs on http://localhost:3000. Postgres 18 runs in Docker on port 5433 (not 5432, often taken by a system Postgres), with its data in the `postgres-data` volume.
+
+`pnpm db:seed` (re)creates « Appartement de test » with two accounts, password `choreganizer`: `alice@example.test` (owner) and `bob@example.test` (member). It only runs against `localhost`, and running it again resets those rows.
 
 ## Scripts
 
@@ -31,6 +34,7 @@ The app runs on http://localhost:3000. Postgres 18 runs in Docker on port 5433 (
 | `pnpm test` | Vitest, once |
 | `pnpm db:generate` | Generate a SQL migration from the Drizzle schema (`server/database/schema/`) into `server/database/migrations/` |
 | `pnpm db:migrate` | Apply pending migrations to the database in `DATABASE_URL` |
+| `pnpm db:seed` | Reset the local test users and apartment (refuses any non-local `DATABASE_URL`) |
 | `pnpm db:auth-schema` | Regenerate Better Auth's tables (`server/database/schema/auth.ts`) after changing its config in `server/utils/auth.ts`, then the migration |
 
 CI runs `lint`, `typecheck` and `test` on every pull request and on pushes to `master`.
