@@ -6,6 +6,7 @@ done-when: You create the flat, add its rooms, and your girlfriend joins with a 
 previous: "[[M0 Skeleton]]"
 next: "[[M2 Tasks]]"
 tech-prep: "[[M1 Apartments, rooms, members tech prep]]"
+plan: "[[M1 Apartments, rooms, members master]]"
 tags:
   - milestone
 ---
@@ -14,7 +15,7 @@ tags:
 
 Part of [[Roadmap]] · ← [[M0 Skeleton]] · next [[M2 Tasks]] →
 
-Tech prep: [[M1 Apartments, rooms, members tech prep]]
+Tech prep: [[M1 Apartments, rooms, members tech prep]] · Plan: [[M1 Apartments, rooms, members master]]
 
 ## Tasks
 
