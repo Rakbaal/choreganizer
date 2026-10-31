@@ -14,21 +14,25 @@
     "test": "vitest run --passWithNoTests",
     "postinstall": "nuxt prepare",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "db:auth-schema": "auth generate --config server/utils/auth.ts --output server/database/schema/auth.ts --yes && drizzle-kit generate"
   },
   "dependencies": {
     "@nuxt/ui": "^4.12.0",
     "@vercel/functions": "^3.10.5",
+    "better-auth": "^1.7.14",
     "drizzle-orm": "^0.45.4",
     "nuxt": "^4.6.2",
     "pg": "^8.23.1",
     "tailwindcss": "^4.3.3",
     "vue": "^3.5.44",
-    "vue-router": "^5.4.0"
+    "vue-router": "^5.4.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.17.0",
     "@types/pg": "^8.23.1",
+    "auth": "1.7.14",
     "drizzle-kit": "^0.31.11",
     "eslint": "^10.13.0",
     "typescript": "^6.0.3",
