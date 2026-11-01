@@ -63,7 +63,7 @@ create table memberships (
 );
 
 create table invites (
-  code         text primary key,              -- nanoid(12), URL-safe
+  code         text primary key,              -- 12 URL-safe chars (node:crypto)
   apartment_id uuid not null references apartments(id) on delete cascade,
   created_by   text not null references "user"(id),
   expires_at   timestamptz not null,

@@ -1,10 +1,12 @@
 ---
 type: milestone
 milestone: M1
-status: todo
+status: in-progress
 done-when: You create the flat, add its rooms, and your girlfriend joins with a code
 previous: "[[M0 Skeleton]]"
 next: "[[M2 Tasks]]"
+tech-prep: "[[M1 Apartments, rooms, members tech prep]]"
+plan: "[[M1 Apartments, rooms, members master]]"
 tags:
   - milestone
 ---
@@ -12,6 +14,8 @@ tags:
 # M1 — Apartments, rooms, members
 
 Part of [[Roadmap]] · ← [[M0 Skeleton]] · next [[M2 Tasks]] →
+
+Tech prep: [[M1 Apartments, rooms, members tech prep]] · Plan: [[M1 Apartments, rooms, members master]]
 
 ## Tasks
 
