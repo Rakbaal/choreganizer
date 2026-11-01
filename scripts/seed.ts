@@ -1,6 +1,6 @@
 // Local data to click through the app: pnpm db:seed. Relative imports: tsx runs this outside Nuxt.
-import { eq, inArray } from 'drizzle-orm'
-import { apartments, memberships, rooms, user } from '../server/database/schema'
+import { eq, inArray, or, sql } from 'drizzle-orm'
+import { apartments, invites, memberships, rooms, user } from '../server/database/schema'
 import { auth } from '../server/utils/auth'
 import { db } from '../server/utils/db'
 
@@ -23,7 +23,11 @@ async function createUser(name: string, email: string) {
 
 // Cascades remove the memberships, sessions and accounts: running it twice gives the same data.
 await db.delete(apartments).where(eq(apartments.id, SEED_APARTMENT_ID))
-await db.delete(user).where(inArray(user.email, ['alice@example.test', 'bob@example.test']))
+// created_by and used_by don't cascade: an invite the seed users made or used in another apartment blocks their deletion.
+const seedUsers = await db.select({ id: user.id }).from(user).where(inArray(user.email, ['alice@example.test', 'bob@example.test']))
+const seedUserIds = seedUsers.map(u => u.id)
+await db.delete(invites).where(or(inArray(invites.createdBy, seedUserIds), inArray(invites.usedBy, seedUserIds)))
+await db.delete(user).where(inArray(user.id, seedUserIds))
 
 const alice = await createUser('Alice', 'alice@example.test')
 const bob = await createUser('Bob', 'bob@example.test')
@@ -36,10 +40,13 @@ await db.insert(memberships).values([
 await db.insert(rooms).values(
   ['Cuisine', 'Salon', 'Salle de bain', 'Chambre', 'Entrée'].map((name, position) => ({ apartmentId: SEED_APARTMENT_ID, name, position })),
 )
+// A fixed 12-character code, so the README can give the link.
+await db.insert(invites).values({ code: 'invitedetest', apartmentId: SEED_APARTMENT_ID, createdBy: alice.id, expiresAt: sql`now() + interval '7 days'` })
 
 console.log(`Seeded « Appartement de test », password « ${PASSWORD} »:
   alice@example.test (owner)
   bob@example.test (member)
-  rooms: Cuisine, Salon, Salle de bain, Chambre, Entrée`)
+  rooms: Cuisine, Salon, Salle de bain, Chambre, Entrée
+  invite: http://localhost:3000/join/invitedetest (unused, valid 7 days)`)
 // db.ts keeps its pool open; nothing else to wait for.
 process.exit(0)
