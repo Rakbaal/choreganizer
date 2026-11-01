@@ -5,6 +5,7 @@ status: todo
 done-when: Passer le balai (anywhere, weekly) and Nettoyer les vitres (Cuisine + Salon, monthly) both exist
 previous: "[[M1 Apartments, rooms, members]]"
 next: "[[M3 Logging and feed]]"
+tech-prep: "[[M2 Tasks tech prep]]"
 tags:
   - milestone
 ---
@@ -12,6 +13,8 @@ tags:
 # M2 — Tasks
 
 Part of [[Roadmap]] · ← [[M1 Apartments, rooms, members]] · next [[M3 Logging and feed]] →
+
+Tech prep: [[M2 Tasks tech prep]]
 
 ## Tasks
 
