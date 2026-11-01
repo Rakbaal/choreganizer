@@ -1,6 +1,6 @@
 // Local data to click through the app: pnpm db:seed. Relative imports: tsx runs this outside Nuxt.
 import { eq, inArray } from 'drizzle-orm'
-import { apartments, memberships, user } from '../server/database/schema'
+import { apartments, memberships, rooms, user } from '../server/database/schema'
 import { auth } from '../server/utils/auth'
 import { db } from '../server/utils/db'
 
@@ -33,9 +33,13 @@ await db.insert(memberships).values([
   { apartmentId: SEED_APARTMENT_ID, userId: alice.id, role: 'owner' },
   { apartmentId: SEED_APARTMENT_ID, userId: bob.id, role: 'member' },
 ])
+await db.insert(rooms).values(
+  ['Cuisine', 'Salon', 'Salle de bain', 'Chambre', 'Entrée'].map((name, position) => ({ apartmentId: SEED_APARTMENT_ID, name, position })),
+)
 
 console.log(`Seeded « Appartement de test », password « ${PASSWORD} »:
   alice@example.test (owner)
-  bob@example.test (member)`)
+  bob@example.test (member)
+  rooms: Cuisine, Salon, Salle de bain, Chambre, Entrée`)
 // db.ts keeps its pool open; nothing else to wait for.
 process.exit(0)

@@ -21,7 +21,7 @@ pnpm dev
 
 The app runs on http://localhost:3000. Postgres 18 runs in Docker on port 5433 (not 5432, often taken by a system Postgres), with its data in the `postgres-data` volume.
 
-`pnpm db:seed` (re)creates « Appartement de test » with two accounts, password `choreganizer`: `alice@example.test` (owner) and `bob@example.test` (member). It only runs against `localhost`, and running it again resets those rows.
+`pnpm db:seed` (re)creates « Appartement de test » with two accounts, password `choreganizer`: `alice@example.test` (owner) and `bob@example.test` (member), and five rooms (Cuisine, Salon, Salle de bain, Chambre, Entrée). It only runs against `localhost`, and running it again resets those rows.
 
 ## Scripts
 

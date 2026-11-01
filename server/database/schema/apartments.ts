@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import { check, pgTable, primaryKey, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { check, integer, pgTable, primaryKey, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core'
 import { user } from './auth'
 
 export const apartments = pgTable('apartments', {
@@ -18,4 +18,15 @@ export const memberships = pgTable('memberships', {
 }, t => [
   primaryKey({ columns: [t.apartmentId, t.userId] }),
   check('memberships_role_check', sql`${t.role} in ('owner', 'member')`),
+])
+
+export const rooms = pgTable('rooms', {
+  id: uuid().primaryKey().defaultRandom(),
+  apartmentId: uuid('apartment_id').notNull().references(() => apartments.id, { onDelete: 'cascade' }),
+  name: text().notNull(),
+  position: integer().notNull().default(0),
+  archivedAt: timestamp('archived_at', { withTimezone: true, mode: 'date' }),
+}, t => [
+  // Partial: an archived room's name can be reused.
+  uniqueIndex('rooms_active_name_idx').on(t.apartmentId, sql`lower(${t.name})`).where(sql`${t.archivedAt} is null`),
 ])
