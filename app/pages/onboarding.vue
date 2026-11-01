@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
+import { z } from 'zod'
 import { createApartmentSchema, type ApartmentNameInput } from '#shared/schemas/apartments'
 
 const { data: apartments } = await useFetch('/api/apartments', { key: 'apartments' })
@@ -25,6 +26,15 @@ async function onSubmit(event: FormSubmitEvent<ApartmentNameInput>) {
   finally {
     loading.value = false
   }
+}
+
+const joinSchema = z.strictObject({ code: z.string().trim().min(1, 'Collez le code ou le lien reçu.') })
+const joinState = reactive({ code: '' })
+
+// Takes a bare code or a pasted /join/<code> link: keeps what follows the last /.
+function onJoin(event: FormSubmitEvent<z.output<typeof joinSchema>>) {
+  const code = event.data.code.replace(/[?#].*$/, '').replace(/\/+$/, '').split('/').pop() ?? ''
+  return navigateTo(`/join/${encodeURIComponent(code)}`)
 }
 </script>
 
@@ -69,6 +79,38 @@ async function onSubmit(event: FormSubmitEvent<ApartmentNameInput>) {
           :loading="loading"
         >
           Créer
+        </UButton>
+      </UForm>
+    </section>
+    <section class="flex flex-col gap-4">
+      <h2 class="text-lg font-semibold">
+        Rejoindre avec un code
+      </h2>
+      <!-- No validation on blur either: an error here would shift the links below just the same. -->
+      <UForm
+        :schema="joinSchema"
+        :state="joinState"
+        :validate-on="['input', 'change']"
+        class="flex flex-col gap-4"
+        @submit="onJoin"
+      >
+        <UFormField
+          label="Code ou lien d'invitation"
+          name="code"
+        >
+          <UInput
+            v-model="joinState.code"
+            autocomplete="off"
+            class="w-full"
+          />
+        </UFormField>
+        <UButton
+          type="submit"
+          block
+          color="neutral"
+          variant="outline"
+        >
+          Rejoindre
         </UButton>
       </UForm>
     </section>
