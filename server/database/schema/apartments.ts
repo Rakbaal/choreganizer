@@ -30,3 +30,12 @@ export const rooms = pgTable('rooms', {
   // Partial: an archived room's name can be reused.
   uniqueIndex('rooms_active_name_idx').on(t.apartmentId, sql`lower(${t.name})`).where(sql`${t.archivedAt} is null`),
 ])
+
+export const invites = pgTable('invites', {
+  code: text().primaryKey(),
+  apartmentId: uuid('apartment_id').notNull().references(() => apartments.id, { onDelete: 'cascade' }),
+  createdBy: text('created_by').notNull().references(() => user.id),
+  expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull(),
+  usedAt: timestamp('used_at', { withTimezone: true, mode: 'date' }),
+  usedBy: text('used_by').references(() => user.id),
+})
