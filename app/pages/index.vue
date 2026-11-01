@@ -1,28 +1,13 @@
 <script setup lang="ts">
-import { authClient } from '~/lib/auth-client'
+const { data: apartments } = await useFetch('/api/apartments', { key: 'apartments' })
+const lastApartment = useCookie<string | null>('last_apartment')
 
-// Same cache key as the middleware: no second request.
-const { data: session } = await useAuthSession()
-
-async function signOut() {
-  await authClient.signOut()
-  // Refetch the cached session, or the middleware still sees the user and sends /login back here.
-  await refreshNuxtData()
-  await navigateTo('/login')
-}
+const active = apartments.value?.filter(a => !a.archivedAt) ?? []
+// The cookie only picks among the user's own active apartments.
+const target = active.find(a => a.id === lastApartment.value) ?? active[0]
+await navigateTo(target ? `/a/${target.id}` : '/onboarding', { replace: true })
 </script>
 
 <template>
-  <UContainer class="flex min-h-dvh flex-col items-center justify-center gap-4 py-12 text-center">
-    <h1 class="text-3xl font-bold">
-      Bonjour {{ session?.user.name }}
-    </h1>
-    <UButton
-      color="neutral"
-      variant="outline"
-      @click="signOut"
-    >
-      Se déconnecter
-    </UButton>
-  </UContainer>
+  <div />
 </template>
