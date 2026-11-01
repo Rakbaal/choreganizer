@@ -15,8 +15,8 @@ Nuxt `pages/`:
 | Route | Screen |
 | --- | --- |
 | `/login`, `/signup` | Auth |
-| `/` | Redirects to the last-used apartment (cookie `last_apartment`), or to `/onboarding` if you have none |
-| `/onboarding` | Create an apartment or enter an invite code |
+| `/` | Redirects to the last-used apartment (cookie `last_apartment`), or to `/onboarding` if none is active |
+| `/onboarding` | Create an apartment, enter an invite code, or reopen an archived one |
 | `/join/[code]` | Accept an invite; signed-out visitors go through sign-up, then return here |
 | `/a/[apartmentId]` | Home: log a chore |
 | `/a/[apartmentId]/feed` | Feed |

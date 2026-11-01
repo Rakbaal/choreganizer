@@ -23,7 +23,7 @@ The app is French only ([[UI language]]) and both ends are ours: a code map per 
 
 ## Consequences
 
-- The French message goes in `message`, never `statusMessage` (the HTTP status line is no place for accents); check in the first route that `$fetch` errors expose it as `error.data.message`
+- The French message goes in `message`, never `statusMessage` (the HTTP status line is no place for accents). VERIFIED 2026-11-01: `$fetch` errors expose it as `error.data.message`. A validation 400 carries h3's ZodError JSON and a production 5xx says « Server Error », so the client's `apiErrorMessage` (`app/utils/api-error.ts`) falls back for both
 - [[Implementation details#Validation]]'s English example ("A room called *Cuisine* already exists") is shown in French
 - If English comes ([[UI language]]: `@nuxtjs/i18n` later), switch to codes then
 

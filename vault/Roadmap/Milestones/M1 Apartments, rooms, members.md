@@ -20,8 +20,8 @@ Tech prep: [[M1 Apartments, rooms, members tech prep]] · Plan: [[M1 Apartments,
 ## Tasks
 
 - [ ] Tables `apartments`, `memberships`, `rooms`, `invites`
-- [ ] `requireMembership` helper + tests
-- [ ] Create / rename / archive apartment; apartment switcher
+- [x] `requireMembership` helper + tests
+- [x] Create / rename / archive apartment; apartment switcher
 - [ ] Rooms CRUD with ordering and archive
 - [ ] Seed script with a sample apartment and rooms for local dev; extend it in each milestone
 - [ ] Invite code: create, accept, expiry, single use, `/join/[code]` through sign-up; last-owner rule on leave
