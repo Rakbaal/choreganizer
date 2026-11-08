@@ -25,17 +25,22 @@ function roomsLabel(task: Task) {
     <li
       v-for="task in active"
       :key="task.id"
-      class="flex flex-col gap-0.5 py-3"
+      class="flex items-center gap-1"
     >
-      <span class="font-medium">{{ task.name }}</span>
-      <span class="text-sm text-muted">
-        {{ frequencyLabel(task.frequency) }} ·
-        <span
-          v-if="!task.allRooms && !task.rooms.length"
-          class="text-warning"
-        >Aucune pièce active</span>
-        <template v-else>{{ roomsLabel(task) }}</template>
-      </span>
+      <NuxtLink
+        :to="`/a/${apartment?.id}/tasks/${task.id}`"
+        class="flex min-w-0 flex-1 flex-col gap-0.5 py-3"
+      >
+        <span class="font-medium">{{ task.name }}</span>
+        <span class="text-sm text-muted">
+          {{ frequencyLabel(task.frequency) }} ·
+          <span
+            v-if="!task.allRooms && !task.rooms.length"
+            class="text-warning"
+          >Aucune pièce active</span>
+          <template v-else>{{ roomsLabel(task) }}</template>
+        </span>
+      </NuxtLink>
     </li>
   </ul>
 </template>

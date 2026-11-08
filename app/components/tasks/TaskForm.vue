@@ -19,6 +19,13 @@ const state = reactive<TaskInput>(props.task
     }
   : { name: '', description: '', frequency: null, allRooms: true, roomIds: [] })
 
+// With no active room the switch is disabled, so an edit that kept « Partout » off could never be saved. Saving turns a
+// room-specific task into « Partout »; its archived rooms' rows stay, so once a room is restored, switching « Partout »
+// off finds it ticked.
+watch(activeRooms, (list) => {
+  if (!list.length) state.allRooms = true
+}, { immediate: true })
+
 // Reka's Select refuses an empty value, hence 'none' for « Au besoin ».
 const unit = computed({
   get: () => state.frequency?.unit ?? 'none',
