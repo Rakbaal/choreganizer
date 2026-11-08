@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import { check, integer, pgTable, primaryKey, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core'
+import { boolean, check, integer, pgTable, primaryKey, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core'
 import { user } from './auth'
 
 export const apartments = pgTable('apartments', {
@@ -30,6 +30,31 @@ export const rooms = pgTable('rooms', {
   // Partial: an archived room's name can be reused.
   uniqueIndex('rooms_active_name_idx').on(t.apartmentId, sql`lower(${t.name})`).where(sql`${t.archivedAt} is null`),
 ])
+
+export const tasks = pgTable('tasks', {
+  id: uuid().primaryKey().defaultRandom(),
+  apartmentId: uuid('apartment_id').notNull().references(() => apartments.id, { onDelete: 'cascade' }),
+  name: text().notNull(),
+  description: text(),
+  allRooms: boolean('all_rooms').notNull().default(false),
+  position: integer().notNull().default(0),
+  frequencyInterval: integer('frequency_interval'),
+  frequencyUnit: text('frequency_unit', { enum: ['day', 'week', 'month'] }),
+  archivedAt: timestamp('archived_at', { withTimezone: true, mode: 'date' }),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+}, t => [
+  // Partial: an archived task's name can be reused.
+  uniqueIndex('tasks_active_name_idx').on(t.apartmentId, sql`lower(${t.name})`).where(sql`${t.archivedAt} is null`),
+  check('tasks_frequency_pair_check', sql`(${t.frequencyInterval} is null) = (${t.frequencyUnit} is null)`),
+  check('tasks_frequency_interval_check', sql`${t.frequencyInterval} is null or ${t.frequencyInterval} between 1 and 365`),
+  check('tasks_frequency_unit_check', sql`${t.frequencyUnit} is null or ${t.frequencyUnit} in ('day', 'week', 'month')`),
+])
+
+// Ignored when the task's all_rooms is set. Rows of archived rooms stay, so restoring a room puts it back in its tasks.
+export const taskRooms = pgTable('task_rooms', {
+  taskId: uuid('task_id').notNull().references(() => tasks.id, { onDelete: 'cascade' }),
+  roomId: uuid('room_id').notNull().references(() => rooms.id, { onDelete: 'cascade' }),
+}, t => [primaryKey({ columns: [t.taskId, t.roomId] })])
 
 export const invites = pgTable('invites', {
   code: text().primaryKey(),
