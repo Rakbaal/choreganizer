@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
 // Relative, not #shared: plain Vitest has no alias, and logSchema is a value import.
-import { feedQuerySchema, logSchema } from '../../shared/schemas/logs'
+import { feedQuerySchema, logSchema, updateLogSchema } from '../../shared/schemas/logs'
 import { logRooms, logs, memberships, rooms } from '../database/schema'
 import { db } from '../utils/db'
 import { createLog, listLogs, logAuthors } from '../utils/logs'
@@ -257,6 +257,17 @@ describe('listLogs', () => {
     expect(page.items.map(item => item.id)).toEqual([bobsBalai.id])
     expect(page.nextCursor).toBeNull()
     expect((await listLogs(apartment.id, {})).items).toHaveLength(3)
+  })
+})
+
+describe('updateLogSchema', () => {
+  it('refuses an empty body and an author', () => {
+    expect(updateLogSchema.safeParse({}).success).toBe(false)
+    expect(updateLogSchema.safeParse({ note: 'x', doneBy: 'someone-else' }).success).toBe(false)
+  })
+
+  it('turns a blank note into null', () => {
+    expect(updateLogSchema.parse({ note: '  ' })).toEqual({ note: null })
   })
 })
 

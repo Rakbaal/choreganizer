@@ -18,6 +18,13 @@ export const logSchema = z.strictObject({
 
 export type LogInput = z.infer<typeof logSchema>
 
+// Only when and the note: never the author, task or rooms (Anyone can edit any log). A note emptied is stored as null.
+export const updateLogSchema = z
+  .strictObject({ doneAt: doneAtSchema.optional(), note: noteSchema.transform(note => note || null).optional() })
+  .refine(body => body.doneAt !== undefined || body.note !== undefined, 'Rien à modifier.')
+
+export type UpdateLogInput = z.input<typeof updateLogSchema>
+
 // <doneAt ISO>_<id> of the previous page's last row. Opaque to the client; the ISO string has no `_`.
 const cursorSchema = z.string().transform((cursor, ctx) => {
   const at = cursor.lastIndexOf('_')
