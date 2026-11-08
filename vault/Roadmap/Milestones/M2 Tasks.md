@@ -19,9 +19,9 @@ Tech prep: [[M2 Tasks tech prep]] · Plan: [[M2 Tasks master]]
 
 ## Tasks
 
-- [ ] Tables `tasks`, `task_rooms`
-- [ ] Task form with frequency and "Anywhere" toggle / room checkboxes
-- [ ] Server-side validation that rooms belong to the apartment
+- [x] Tables `tasks`, `task_rooms`
+- [x] Task form with frequency and "Anywhere" toggle / room checkboxes
+- [x] Server-side validation that rooms belong to the apartment
 - [ ] Edit and archive tasks
 - [ ] Drag to reorder tasks (`position`, see [[Manual task order]])
 

@@ -16,4 +16,13 @@ export const taskSchema = z.strictObject({
   roomIds: z.array(z.uuid()),
 }).refine(t => t.allRooms || t.roomIds.length > 0, { message: 'Choisissez au moins une pièce.', path: ['roomIds'] })
 
+// One change per request: the client never combines them, so {} or two keys are a 400. An edit is the whole form, a
+// full replacement.
+export const updateTaskSchema = z.union([
+  taskSchema,
+  z.strictObject({ position: z.int().min(0) }),
+  z.strictObject({ archived: z.boolean() }),
+])
+
 export type TaskInput = z.infer<typeof taskSchema>
+export type UpdateTaskInput = z.infer<typeof updateTaskSchema>
