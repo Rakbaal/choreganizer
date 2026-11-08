@@ -1,6 +1,6 @@
 // Local data to click through the app: pnpm db:seed. Relative imports: tsx runs this outside Nuxt.
 import { eq, inArray, or, sql } from 'drizzle-orm'
-import { apartments, invites, memberships, rooms, taskRooms, tasks, user } from '../server/database/schema'
+import { apartments, invites, logRooms, logs, memberships, rooms, taskRooms, tasks, user } from '../server/database/schema'
 import { auth } from '../server/utils/auth'
 import { db } from '../server/utils/db'
 
@@ -21,11 +21,14 @@ async function createUser(name: string, email: string) {
   return user
 }
 
+const seedUsers = await db.select({ id: user.id }).from(user).where(inArray(user.email, ['alice@example.test', 'bob@example.test']))
+const seedUserIds = seedUsers.map(u => u.id)
+// Logs first: log_rooms.room_id doesn't cascade, so the apartment's rooms can't go while its logs name them; and
+// done_by doesn't either, so a seed user's log in another apartment blocks deleting that user.
+await db.delete(logs).where(or(eq(logs.apartmentId, SEED_APARTMENT_ID), inArray(logs.doneBy, seedUserIds)))
 // Cascades remove the memberships, sessions and accounts: running it twice gives the same data.
 await db.delete(apartments).where(eq(apartments.id, SEED_APARTMENT_ID))
 // created_by and used_by don't cascade: an invite the seed users made or used in another apartment blocks their deletion.
-const seedUsers = await db.select({ id: user.id }).from(user).where(inArray(user.email, ['alice@example.test', 'bob@example.test']))
-const seedUserIds = seedUsers.map(u => u.id)
 await db.delete(invites).where(or(inArray(invites.createdBy, seedUserIds), inArray(invites.usedBy, seedUserIds)))
 await db.delete(user).where(inArray(user.id, seedUserIds))
 
@@ -52,11 +55,23 @@ await db.insert(taskRooms).values(
 // A fixed 12-character code, so the README can give the link.
 await db.insert(invites).values({ code: 'invitedetest', apartmentId: SEED_APARTMENT_ID, createdBy: alice.id, expiresAt: sql`now() + interval '7 days'` })
 
+const taskId = (name: string) => seedTasks.find(task => task.name === name)!.id
+const seedLogs = await db.insert(logs).values([
+  // Yesterday at 20:00 in Brussels: today's local midnight minus 4 hours.
+  { apartmentId: SEED_APARTMENT_ID, taskId: taskId('Passer le balai'), doneBy: alice.id, doneAt: sql`(date_trunc('day', now() at time zone 'Europe/Brussels') - interval '4 hours') at time zone 'Europe/Brussels'` },
+  { apartmentId: SEED_APARTMENT_ID, taskId: vitres.id, doneBy: bob.id, doneAt: sql`now() - interval '3 days'` },
+  { apartmentId: SEED_APARTMENT_ID, taskId: taskId('Sortir les poubelles'), doneBy: alice.id, doneAt: sql`now() - interval '2 hours'` },
+]).returning()
+await db.insert(logRooms).values(
+  seedRooms.filter(room => room.name === 'Cuisine' || room.name === 'Salon').map(room => ({ logId: seedLogs.find(l => l.taskId === vitres.id)!.id, roomId: room.id })),
+)
+
 console.log(`Seeded « Appartement de test », password « ${PASSWORD} »:
   alice@example.test (owner)
   bob@example.test (member)
   rooms: Cuisine, Salon, Salle de bain, Chambre, Entrée
   tasks: Passer le balai (partout, chaque semaine), Nettoyer les vitres (Cuisine, Salon, chaque mois), Sortir les poubelles (partout, au besoin)
-  invite: http://localhost:3000/join/invitedetest (unused, valid 7 days)`)
+  invite: http://localhost:3000/join/invitedetest (unused, valid 7 days)
+  logs: Alice Passer le balai (hier 20:00), Bob Nettoyer les vitres (il y a 3 jours, Cuisine, Salon), Alice Sortir les poubelles (il y a 2 heures)`)
 // db.ts keeps its pool open; nothing else to wait for.
 process.exit(0)
