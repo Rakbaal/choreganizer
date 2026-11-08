@@ -14,7 +14,7 @@ dist/
 .cache/
 
 # Logs
-logs/
+/logs/
 *.log
 
 # Editors / OS
