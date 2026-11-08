@@ -16,8 +16,7 @@ export default defineConfig({
     url: 'http://localhost:3000',
     // Nuxt's output in the test log: its startup time, and Vite's warnings.
     stdout: 'pipe',
+    // Playwright's default 60 s startup timeout: CI's cold `nuxt dev` answers in about 8 s.
     reuseExistingServer: !process.env.CI,
-    // Nuxt's first dev compile is slow on a cold CI runner.
-    timeout: 180_000,
   },
 })
