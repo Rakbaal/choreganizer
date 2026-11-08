@@ -68,7 +68,7 @@ See [[Archive, never delete]].
 
 ## Quick log
 
-Optimistic: the button shows done at once, the request runs in the background, a failure shows **Retry** ([[Optimistic logging]]).
+Optimistic: the button shows done at once, the request runs in the background, a failure shows **Retry**; a refusal from the server shows its reason instead ([[Optimistic logging]]).
 
 ## Feed
 

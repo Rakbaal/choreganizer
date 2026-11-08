@@ -11,7 +11,7 @@ tags:
 
 ## Decision
 
-Tapping a task marks it done on screen at once and sends the request in the background. If it fails, a toast offers **Retry**. No offline queue in the MVP.
+Tapping a task marks it done on screen at once and sends the request in the background. If it fails, a toast offers **Retry**; a refusal from the server (a 4xx, e.g. the task was archived meanwhile) shows its reason instead, since retrying would fail again (M3 step 3). No offline queue in the MVP.
 
 ## Why
 
