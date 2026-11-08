@@ -24,6 +24,7 @@ const latest = new Map<string, Entry>()
 // soon as it exists, a failure puts the line back.
 export function useQuickLog() {
   const toast = useToast()
+  const editor = useLogEditor()
   const { apartment } = useApartment()
   const { data: session } = useNuxtData<Session | null>('auth-session')
   // The line shown while a log or an Undo is in flight, by task id; absent: the task's own lastLog.
@@ -62,9 +63,19 @@ export function useQuickLog() {
     entry.toastId = toast.add({
       title: `${task.name} · noté`,
       duration: 8000,
-      actions: [{ label: 'Annuler', color: 'neutral', variant: 'outline', onClick: () => undoEntry(entry) }],
+      actions: [
+        { label: 'Annuler', color: 'neutral', variant: 'outline', onClick: () => undoEntry(entry) },
+        { label: 'Modifier', color: 'neutral', variant: 'outline', onClick: () => editEntry(entry) },
+      ],
     }).id
     entry.promise = post(task, entry)
+  }
+
+  // This tap's own log, once its POST has the id (Log in the past: log now, then change « Quand »). A failed POST
+  // already shows its error toast.
+  async function editEntry(entry: Entry) {
+    const created = await entry.promise
+    if (created && !entry.undone) editor.open(created)
   }
 
   async function post(task: Task, entry: Entry): Promise<LogEntry | null> {

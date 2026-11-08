@@ -37,5 +37,6 @@ useHead({ bodyAttrs: { class: 'has-bottom-nav' } })
       <NuxtPage />
     </UContainer>
     <BottomNav />
+    <LogsLogEditSheet />
   </div>
 </template>

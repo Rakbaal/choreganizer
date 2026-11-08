@@ -62,6 +62,15 @@ watch(page, (fresh) => {
   items.value = [...first, ...items.value.filter(entry => !ids.has(entry.id) && isNewer(tail, entry))]
 })
 
+// A save or delete from the sheet shows at once, wherever the row is; then page 1 refetches around it.
+const editor = useLogEditor()
+editor.onChange((change) => {
+  items.value = change.type === 'delete'
+    ? items.value.filter(entry => entry.id !== change.id)
+    : items.value.map(entry => (entry.id === change.entry.id ? change.entry : entry)).sort(byNewest)
+  refresh()
+})
+
 const loadingMore = ref(false)
 async function loadMore() {
   if (!cursor.value) return
@@ -183,29 +192,34 @@ const roomItems = computed(() => [
         <li
           v-for="entry in group.entries"
           :key="entry.id"
-          class="py-3"
         >
-          <p>
-            {{ entry.by.name }} · <span :class="muted(entry.task.archived)">{{ entry.task.name }}</span> ·
-            <template v-if="entry.rooms.length">
-              <template
-                v-for="(room, index) in entry.rooms"
-                :key="room.id"
-              >
-                <span :class="muted(room.archived)">{{ room.name }}</span>{{ index < entry.rooms.length - 1 ? ', ' : '' }}
-              </template>
-            </template>
-            <template v-else>
-              Tout l'appartement
-            </template>
-            · {{ timeOfDay(entry.doneAt, timeZone) }}
-          </p>
-          <p
-            v-if="entry.note"
-            class="text-sm text-muted"
+          <button
+            type="button"
+            class="w-full py-3 text-left"
+            @click="editor.open(entry)"
           >
-            {{ entry.note }}
-          </p>
+            <p>
+              {{ entry.by.name }} · <span :class="muted(entry.task.archived)">{{ entry.task.name }}</span> ·
+              <template v-if="entry.rooms.length">
+                <template
+                  v-for="(room, index) in entry.rooms"
+                  :key="room.id"
+                >
+                  <span :class="muted(room.archived)">{{ room.name }}</span>{{ index < entry.rooms.length - 1 ? ', ' : '' }}
+                </template>
+              </template>
+              <template v-else>
+                Tout l'appartement
+              </template>
+              · {{ timeOfDay(entry.doneAt, timeZone) }}
+            </p>
+            <p
+              v-if="entry.note"
+              class="text-sm text-muted"
+            >
+              {{ entry.note }}
+            </p>
+          </button>
         </li>
       </ul>
     </section>
