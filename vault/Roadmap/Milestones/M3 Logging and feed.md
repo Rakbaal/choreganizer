@@ -5,6 +5,7 @@ status: todo
 done-when: You each log a chore from your phones and see each other's entries in the feed
 previous: "[[M2 Tasks]]"
 next: "[[M4 Polish for daily use]]"
+tech-prep: "[[M3 Logging and feed tech prep]]"
 tags:
   - milestone
 ---
@@ -12,6 +13,8 @@ tags:
 # M3 — Logging and feed
 
 Part of [[Roadmap]] · ← [[M2 Tasks]] · next [[M4 Polish for daily use]] →
+
+Tech prep: [[M3 Logging and feed tech prep]]
 
 ## Tasks
 
