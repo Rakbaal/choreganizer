@@ -4,7 +4,7 @@ import { apartments } from '../../../database/schema'
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
-  // Body first: whether the owner is required depends on it. Renaming stays open to members.
+  // Body first: whether the owner is required depends on it. Renaming and the timezone stay open to members.
   const body = await readValidatedBody(event, updateApartmentSchema.parse)
   const { role } = await requireMembership(event, id, { owner: body.archived !== undefined })
 
@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
   // Drizzle leaves undefined keys out of the update.
   const [apartment] = await db
     .update(apartments)
-    .set({ name: body.name, archivedAt })
+    .set({ name: body.name, timezone: body.timezone, archivedAt })
     .where(eq(apartments.id, id!))
     .returning()
   return toApartment(apartment!, role)

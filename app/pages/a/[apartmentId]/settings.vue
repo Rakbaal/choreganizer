@@ -8,6 +8,7 @@ const { isOwner } = useApartment()
       Réglages
     </h1>
     <SettingsApartmentName />
+    <SettingsApartmentTimezone />
     <SettingsRoomList />
     <SettingsMemberList />
     <SettingsArchiveApartment v-if="isOwner" />
