@@ -36,3 +36,18 @@ jobs:
       - run: pnpm test
         env:
           TEST_DATABASE_URL: postgres://choreganizer:choreganizer@localhost:5432/choreganizer_test
+      - run: pnpm exec playwright install --with-deps chromium
+      # Playwright starts `pnpm dev` against the database Vitest just migrated; each run signs up a fresh user.
+      - run: pnpm test:e2e
+        env:
+          DATABASE_URL: postgres://choreganizer:choreganizer@localhost:5432/choreganizer_test
+          # CI only: signs the test run's session cookies, never used anywhere else.
+          BETTER_AUTH_SECRET: ci-only-secret-not-used-anywhere-else-0123456789
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
