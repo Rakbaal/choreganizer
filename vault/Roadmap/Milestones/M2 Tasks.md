@@ -1,7 +1,7 @@
 ---
 type: milestone
 milestone: M2
-status: in-progress
+status: done
 done-when: Passer le balai (anywhere, weekly) and Nettoyer les vitres (Cuisine + Salon, monthly) both exist
 previous: "[[M1 Apartments, rooms, members]]"
 next: "[[M3 Logging and feed]]"
@@ -22,8 +22,8 @@ Tech prep: [[M2 Tasks tech prep]] · Plan: [[M2 Tasks master]]
 - [x] Tables `tasks`, `task_rooms`
 - [x] Task form with frequency and "Anywhere" toggle / room checkboxes
 - [x] Server-side validation that rooms belong to the apartment
-- [ ] Edit and archive tasks
-- [ ] Drag to reorder tasks (`position`, see [[Manual task order]])
+- [x] Edit and archive tasks
+- [x] Drag to reorder tasks (`position`, see [[Manual task order]])
 
 ## Done when
 

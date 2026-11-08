@@ -1,10 +1,12 @@
 ---
 type: milestone
 milestone: M3
-status: todo
+status: in-progress
 done-when: You each log a chore from your phones and see each other's entries in the feed
 previous: "[[M2 Tasks]]"
 next: "[[M4 Polish for daily use]]"
+tech-prep: "[[M3 Logging and feed tech prep]]"
+plan: "[[M3 Logging and feed master]]"
 tags:
   - milestone
 ---
@@ -13,6 +15,8 @@ tags:
 
 Part of [[Roadmap]] · ← [[M2 Tasks]] · next [[M4 Polish for daily use]] →
 
+Tech prep: [[M3 Logging and feed tech prep]] · Plan: [[M3 Logging and feed master]]
+
 ## Tasks
 
 - [ ] Tables `logs`, `log_rooms`
@@ -20,6 +24,7 @@ Part of [[Roadmap]] · ← [[M2 Tasks]] · next [[M4 Polish for daily use]] →
 - [ ] "Last done X ago by Y" on task buttons, so you see when the other person just did it
 - [ ] Feed grouped by day, cursor pagination, filters (room filter includes whole-flat logs)
 - [ ] Edit / delete a log; log in the past
+- [ ] Edit the apartment's timezone in settings (the feed's day grouping is its first use)
 
 ## Done when
 
