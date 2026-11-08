@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import { boolean, check, integer, pgTable, primaryKey, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core'
+import { boolean, check, index, integer, pgTable, primaryKey, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core'
 import { user } from './auth'
 
 export const apartments = pgTable('apartments', {
@@ -55,6 +55,28 @@ export const taskRooms = pgTable('task_rooms', {
   taskId: uuid('task_id').notNull().references(() => tasks.id, { onDelete: 'cascade' }),
   roomId: uuid('room_id').notNull().references(() => rooms.id, { onDelete: 'cascade' }),
 }, t => [primaryKey({ columns: [t.taskId, t.roomId] })])
+
+// task_id and done_by don't cascade: archive, never delete. apartment_id is denormalised for the feed.
+export const logs = pgTable('logs', {
+  id: uuid().primaryKey().defaultRandom(),
+  apartmentId: uuid('apartment_id').notNull().references(() => apartments.id, { onDelete: 'cascade' }),
+  taskId: uuid('task_id').notNull().references(() => tasks.id),
+  doneBy: text('done_by').notNull().references(() => user.id),
+  // Milliseconds, not Postgres' microseconds: the feed cursor goes through JavaScript Dates.
+  doneAt: timestamp('done_at', { precision: 3, withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  note: text(),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+}, t => [
+  // Nulls first, Postgres' default for desc: Drizzle's desc() writes nulls last, which an `order by done_at desc` can't use.
+  index('logs_feed_idx').on(t.apartmentId, t.doneAt.desc().nullsFirst(), t.id.desc().nullsFirst()),
+  check('logs_note_length_check', sql`${t.note} is null or length(${t.note}) <= 500`),
+])
+
+// No rows: the whole flat (only for a task with all_rooms set).
+export const logRooms = pgTable('log_rooms', {
+  logId: uuid('log_id').notNull().references(() => logs.id, { onDelete: 'cascade' }),
+  roomId: uuid('room_id').notNull().references(() => rooms.id),
+}, t => [primaryKey({ columns: [t.logId, t.roomId] })])
 
 export const invites = pgTable('invites', {
   code: text().primaryKey(),

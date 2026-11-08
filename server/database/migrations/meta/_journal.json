@@ -36,6 +36,13 @@
       "when": 1794144570802,
       "tag": "0004_friendly_penance",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794164007340,
+      "tag": "0005_handy_wrecker",
+      "breakpoints": true
     }
   ]
 }
