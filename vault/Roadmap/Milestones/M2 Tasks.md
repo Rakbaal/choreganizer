@@ -1,7 +1,7 @@
 ---
 type: milestone
 milestone: M2
-status: todo
+status: in-progress
 done-when: Passer le balai (anywhere, weekly) and Nettoyer les vitres (Cuisine + Salon, monthly) both exist
 previous: "[[M1 Apartments, rooms, members]]"
 next: "[[M3 Logging and feed]]"
