@@ -6,6 +6,7 @@ done-when: Passer le balai (anywhere, weekly) and Nettoyer les vitres (Cuisine +
 previous: "[[M1 Apartments, rooms, members]]"
 next: "[[M3 Logging and feed]]"
 tech-prep: "[[M2 Tasks tech prep]]"
+plan: "[[M2 Tasks master]]"
 tags:
   - milestone
 ---
@@ -14,7 +15,7 @@ tags:
 
 Part of [[Roadmap]] · ← [[M1 Apartments, rooms, members]] · next [[M3 Logging and feed]] →
 
-Tech prep: [[M2 Tasks tech prep]]
+Tech prep: [[M2 Tasks tech prep]] · Plan: [[M2 Tasks master]]
 
 ## Tasks
 
