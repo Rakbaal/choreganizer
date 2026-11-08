@@ -39,7 +39,7 @@ Who moves `status`:
 
 - Tech prep: `obsidian-tech-prep` writes `draft`, and `validated` on Leo's go-ahead.
 - Master: `obsidian-implementation-plan` writes `draft`; `obsidian-implement-step` sets `in-progress` when the first step starts; `obsidian-step-done` sets `done` once every step is `done`.
-- Step: `obsidian-implementation-plan` writes `light`, or `ready` for a step it details with nothing blocking; `obsidian-prepare-step` sets `ready`. Whichever sets `ready` also sets `prepared:` to today; `obsidian-implement-step` sets `in-progress`, then `in-review` with `pr:` once the draft PR is open; `obsidian-step-done` sets `done` only when the PR is merged.
+- Step: `obsidian-implementation-plan` writes `light`; `obsidian-implement-step` details it and sets `ready` (or the optional `obsidian-prepare-step` does, ahead of it). Whichever sets `ready` also sets `prepared:` to today; `obsidian-implement-step` then sets `in-progress`, and `in-review` with `pr:` once the draft PR is open; `obsidian-step-done` sets `done` only when the PR is merged.
 
 **Finding the current step.** The step being implemented is the one whose `branch:` property equals the current git branch:
 

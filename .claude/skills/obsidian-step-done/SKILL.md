@@ -1,6 +1,6 @@
 ---
 name: obsidian-step-done
-description: Reconcile a Choreganizer implementation plan (Obsidian vault, vault/Plans/<Project>/) with what was actually built on a step's branch. Diffs the branch against its step note, reports the drift (planned but not done, done but not planned, changed decisions or interfaces), finds the decisions, later steps and vault notes it affects, and after approval updates the master, the impacted step notes and the milestone. Use when a step is done or nearly done, before its PR leaves draft, or when asked "did we drift from the plan?", "reconcile the plan", "step done", or /obsidian-step-done in choreganizer. Not for writing a plan (obsidian-implementation-plan) or detailing the next step (obsidian-prepare-step).
+description: Reconcile a Choreganizer implementation plan (Obsidian vault, vault/Plans/<Project>/) with what was actually built on a step's branch. Diffs the branch against its step note, reports the drift (planned but not done, done but not planned, changed decisions or interfaces), finds the decisions, later steps and vault notes it affects, and updates the master, the impacted step notes and the milestone, asking Leo only about decisions (a dropped item, a Decision or Project note). Use when a step is done or nearly done, before its PR leaves draft, or when asked "did we drift from the plan?", "reconcile the plan", "step done", or /obsidian-step-done in choreganizer. Not for writing a plan (obsidian-implementation-plan) or building the next step (obsidian-implement-step).
 argument-hint: "[step note name or path | step number] [project]"
 ---
 
@@ -12,7 +12,7 @@ Plans live in `vault/Plans/<Project>/` (master + `Steps/`), written by `obsidian
 
 **Read `.claude/skills/obsidian-tech-prep/references/vault-conventions.md` first** (properties, notes outside `Plans/`, vault commits).
 
-Nothing is edited before Leo approves the proposal (Phase 4). No code commits. Vault commits follow the conventions, on the branch checked out, which is usually the step's own: the reconciled plan then ships in its PR.
+Keep it quick: Leo's effort goes into the tech prep and `/obsidian-implement-step`, and he trusts the bookkeeping here. Edits inside `vault/Plans/` are applied without waiting; only the decisions listed in Phase 4 wait for him. No code commits. Vault commits follow the conventions, on the branch checked out, which is usually the step's own: the reconciled plan then ships in its PR.
 
 ## Phase 1 — Resolve the step
 
@@ -48,15 +48,13 @@ For each drift row:
 - **Design notes.** A drift that changes what a `Project/` note says (a route, a column, a permission, a limit in [[Implementation details#Validation]]): flag it and propose the one-line update, applied only on Leo's OK (vault conventions).
 - **Milestone.** Tasks of the milestone whose coverage rows are now all on merged steps: candidates for `- [x]`.
 
-## Phase 4 — Propose, then stop
+## Phase 4 — Ask only what needs Leo
 
-Give Leo, in this order:
-1. The drift table: kind · item · VERIFIED/HYPOTHESIS + evidence.
-2. Questions on rows that need his decision (in progress or moved? keep or drop?).
-3. The proposed edits, grouped by note, one line each: `master: D7 — invite expiry moves to the accept route`, `step 3: Context cites D7, Changes item 4 now uses requireOwner`, `coverage: "last-owner rule" row → step 4`, `[[Optimistic logging]]: Consequences updated`, `milestone: tick "Rooms CRUD with ordering and archive"`.
-4. Anything that changes the tech prep note itself: list it, don't edit it (it records what was validated).
+Split the edits in two:
+- **Apply without asking** (Phase 5): everything inside `vault/Plans/` (this step, the master's `D<n>` lines, coverage, stacks, ❓, Changelog, later steps) and milestone ticks whose coverage rows are all on merged steps. These follow from the code and the deviation log, which Leo already agreed to.
+- **Ask first**, with AskUserQuestion (standalone, recommended option first), all in one round: a "planned, not done" row (in progress, moved to a later step, or dropped?), a HYPOTHESIS row that would change a later step, an edit to a Decision note or a `Project/` note, a new decision.
 
-Stop and wait for approval. Leo may edit the notes meanwhile.
+With no question, go straight to Phase 5. Anything that changes the tech prep note itself: list it in the report, don't edit it (it records what was validated).
 
 ## Phase 5 — Apply
 
@@ -67,9 +65,10 @@ Checkpoint commit first. Re-read every note from disk before editing it. Apply n
   `- <YYYY-MM-DD> · step <N> done · <D-ids changed, with a few words each> · steps <list> updated`
   Set the master's `status: done` when every step is `done`.
 - **Later steps:** edit only what the drift touches: Context, Consumes, the `Changes` items that build on what changed, "Not in this step" when scope moved. Don't rewrite a step the drift doesn't reach.
-- **Outside `Plans/`**, only what was approved: Decision notes, milestone ticks, `Project/Open questions.md`, one-line `Project/` updates.
+- **Outside `Plans/`**, milestone ticks, and what Leo approved in Phase 4: Decision notes, `Project/Open questions.md`, one-line `Project/` updates.
 - End with the result commit `step-done: <Project> step <N>`, D-ids changed and notes updated in its body. Give its short SHA, `git show <sha>` to review, `git revert <sha>` to undo. The reconciled plan lives in `vault/Plans/` (git-ignored), so it never reaches the PR: this skill doesn't push.
+- Report, short: the drift table (kind · item · VERIFIED/HYPOTHESIS + evidence), the edits made grouped by note (one line each: `master: D7 — invite expiry moves to the accept route`, `step 3: Changes item 4 now uses requireOwner`), anything that changes the tech prep, and the commit SHA if one was made.
 
 ## Next
 
-The next step is detailed and its open questions settled by `/obsidian-prepare-step`, in its own session. Suggest it once the result commit is made.
+The next step is detailed and built by `/obsidian-implement-step <N+1> <Project>`, in a fresh session. Suggest it once the result commit is made.

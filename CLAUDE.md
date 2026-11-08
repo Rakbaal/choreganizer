@@ -15,11 +15,11 @@ When the plan changes, update the vault notes (keep the YAML properties and `[[w
 
 ## Feature workflow
 This repo uses the Obsidian versions of the workflow skills. They replace the Notion and `~/dev/leexi-ai/plans` flow from the global CLAUDE.md here:
+The time goes into two stages: the tech prep (design, every question settled) and implement-step (detail the step against the code, then build it). Everything between and after is quick, and steps are as few and as large as can ship (usually 1–3 per milestone, one stack).
 1. Milestone note → `obsidian-tech-prep` → `vault/Plans/<Project>/<Project> tech prep.md`, validated in the vault
-2. `obsidian-implementation-plan` → `<Project> master.md` + `Steps/<Project> step N.md` in the same folder
-3. `obsidian-prepare-step` → step detailed and its open questions settled; no code in that session
-4. `obsidian-implement-step`, in a fresh session in auto mode (it holds its plan for approval in plan mode only when the step is stale or risky; start in plan mode to force it) → one branch + draft PR per step, stacked with gh stack
-5. `obsidian-step-done` → reconcile the plan with the branch before the PR leaves draft
+2. `obsidian-implementation-plan` → `<Project> master.md` + `Steps/<Project> step N.md` in the same folder, every step light
+3. `obsidian-implement-step`, in a fresh session in auto mode → details the step, settles its questions with Leo in one round, then one branch + draft PR per step, stacked with gh stack (it holds its plan for approval in plan mode only when the step is risky; start in plan mode to force it). `obsidian-prepare-step` is optional, to settle a step's questions in a separate session first
+4. `obsidian-step-done` → reconcile the plan with the branch before the PR leaves draft; asks only about decisions
 
 Conventions for those notes (properties, links, branches, vault commits) are in `.claude/skills/obsidian-tech-prep/references/vault-conventions.md`.
 

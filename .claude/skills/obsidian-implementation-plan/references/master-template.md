@@ -23,7 +23,7 @@ Part of [[<Milestone>]] · Tech prep: [[<Project> tech prep]]
 > - [[<Project> tech prep]] (validated YYYY-MM-DD) · or Claude session plan `~/.claude/plans/<slug>.md`, snapshot in [[<Project> source plan]]
 > - `Project/` notes, Decision notes, branches in flight, library docs. One line each, each one a link.
 
-<One short paragraph: what ships at the end, the slicing choice (how many stacks, which order) and why.>
+<One short paragraph: what ships at the end, how many steps and why.>
 
 ## Tech prep recap
 A condensed but faithful summary of the tech prep, heading by heading, keeping its headings so each line can be traced back. Decisions with their rationale, mechanisms reused, validations and limits, design risks. No new design here.
@@ -42,31 +42,22 @@ What checking the tech prep against current `origin/master` and the vault showed
 Write "Nothing found" rather than dropping the section.
 
 ## Implementation strategy
-- How the work is sliced and why this order: riskiest first, vertical slices.
-- How master stays working between stacks: route unused, screen not linked from the navigation, button hidden until Stack N. Master deploys to production, so this is what both of you see on your phones.
+- How many steps and why each cut exists (use sooner, design risk, too big to review: the plan skill's Phase 2). One step is a fine answer.
+- How master stays working after each step: route unused, screen not linked from the navigation, button hidden until step N. Master deploys to production, so this is what both of you see on your phones.
 - Data concerns: migrations, embedded data.
 - Any change from the tech prep's PR stack, with the reason.
 
 ## Stacks
 
-### Stack A — <one-sentence slice> · base `master` · <independent | needs Stack X merged>
-| Step | Branch | Concern |
+### Stack A — <one-sentence slice> · base `master`
+| Step | Branch | Slice |
 |---|---|---|
-| [[<Project> step 1\|1]] | `feat/<slug>` | <one sentence> |
-| [[<Project> step 2\|2]] | `feat/<slug>` | <one sentence> |
-| [[<Project> step 3\|3]] | `feat/<slug>` | <one sentence> |
+| [[<Project> step 1\|1]] | `feat/<slug>` | <one sentence: what ships> |
+| [[<Project> step 2\|2]] | `feat/<slug>` | <one sentence: what ships> |
 
-**Master after this stack merges:** <what the deployed app shows or doesn't, what is wired up.>
+**Master after each step merges:** <per step, what the deployed app shows or doesn't, what is wired up.>
 
-### Stack B — …
-
-Optional mermaid diagram when several stacks depend on each other. Labels equal to note names plus `class … internal-link;` make the nodes clickable:
-```mermaid
-flowchart LR
-  master --> s1["<Project> step 1"] --> s2["<Project> step 2"]
-  master -. after Stack A .-> s3["<Project> step 3"]
-  class s1,s2,s3 internal-link;
-```
+A second stack only when Leo asked for parallel work; then say whether it is independent or needs Stack A merged, and add a mermaid diagram (labels equal to note names plus `class … internal-link;` make the nodes clickable).
 
 ## Coverage
 Every requirement, decision, validation, limit of the tech prep and every Task of the milestone, mapped to where it gets done. Go through the tech prep heading by heading.
