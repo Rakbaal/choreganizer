@@ -6,6 +6,7 @@ done-when: You each log a chore from your phones and see each other's entries in
 previous: "[[M2 Tasks]]"
 next: "[[M4 Polish for daily use]]"
 tech-prep: "[[M3 Logging and feed tech prep]]"
+plan: "[[M3 Logging and feed master]]"
 tags:
   - milestone
 ---
@@ -14,7 +15,7 @@ tags:
 
 Part of [[Roadmap]] · ← [[M2 Tasks]] · next [[M4 Polish for daily use]] →
 
-Tech prep: [[M3 Logging and feed tech prep]]
+Tech prep: [[M3 Logging and feed tech prep]] · Plan: [[M3 Logging and feed master]]
 
 ## Tasks
 
