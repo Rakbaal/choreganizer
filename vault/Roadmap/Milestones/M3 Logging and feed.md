@@ -1,7 +1,7 @@
 ---
 type: milestone
 milestone: M3
-status: todo
+status: in-progress
 done-when: You each log a chore from your phones and see each other's entries in the feed
 previous: "[[M2 Tasks]]"
 next: "[[M4 Polish for daily use]]"
