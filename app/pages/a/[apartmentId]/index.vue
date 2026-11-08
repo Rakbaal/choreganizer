@@ -110,16 +110,11 @@ function logFromSheet(roomIds: string[]) {
         </UButton>
       </li>
     </ul>
-    <div class="flex flex-col items-center gap-2">
+    <div
+      v-if="!activeRooms.length"
+      class="flex flex-col items-center gap-2"
+    >
       <ULink
-        v-if="activeTasks.length"
-        :to="`/a/${apartment?.id}/tasks`"
-        class="text-primary"
-      >
-        Gérer les tâches
-      </ULink>
-      <ULink
-        v-if="!activeRooms.length"
         :to="`/a/${apartment?.id}/settings`"
         class="text-primary"
       >

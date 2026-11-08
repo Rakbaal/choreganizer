@@ -1,8 +1,8 @@
 // Explicit imports, not Nitro's auto-imports: the tests load this file with plain Vitest.
-import { and, desc, eq, inArray, isNull } from 'drizzle-orm'
+import { and, asc, desc, eq, exists, inArray, isNull, notExists, or, sql, type SQL } from 'drizzle-orm'
 import { createError } from 'h3'
-import type { LogInput } from '#shared/schemas/logs'
-import type { LogEntry } from '#shared/types/logs'
+import type { FeedQuery, LogInput } from '#shared/schemas/logs'
+import type { LogEntry, LogPage } from '#shared/types/logs'
 import { logRooms, logs, rooms, taskRooms, tasks, user } from '../database/schema'
 import { db } from './db'
 import type { Tx } from './tasks'
@@ -62,6 +62,47 @@ export async function createLog(input: LogInput, ctx: { apartmentId: string, use
     }
     return (await logEntries(tx, [log!.id]))[0]!
   })
+}
+
+// Data model § Feed query: newest first, one page after the cursor. Every filter stays inside the apartment, so an id
+// from another one just returns nothing. pageSize is for the tests; the route keeps the default.
+export async function listLogs(apartmentId: string, filters: FeedQuery, pageSize = 50): Promise<Omit<LogPage, 'people'>> {
+  const conditions: SQL[] = [eq(logs.apartmentId, apartmentId)]
+  if (filters.cursor) {
+    conditions.push(sql`(${logs.doneAt}, ${logs.id}) < (${filters.cursor.doneAt.toISOString()}::timestamptz, ${filters.cursor.id}::uuid)`)
+  }
+  if (filters.userId) conditions.push(eq(logs.doneBy, filters.userId))
+  if (filters.taskId) conditions.push(eq(logs.taskId, filters.taskId))
+  if (filters.roomId) {
+    // Room filter includes whole-flat logs: that room's logs, plus the logs with no room.
+    conditions.push(or(
+      exists(db.select().from(logRooms).where(and(eq(logRooms.logId, logs.id), eq(logRooms.roomId, filters.roomId)))),
+      notExists(db.select().from(logRooms).where(eq(logRooms.logId, logs.id))),
+    )!)
+  }
+  // Plain desc(), as logs_feed_idx is ordered: one more row than the page tells whether another page exists.
+  const rows = await db
+    .select({ id: logs.id, doneAt: logs.doneAt })
+    .from(logs)
+    .where(and(...conditions))
+    .orderBy(desc(logs.doneAt), desc(logs.id))
+    .limit(pageSize + 1)
+  const page = rows.slice(0, pageSize)
+  const last = page.at(-1)
+  return {
+    items: await logEntries(db, page.map(row => row.id)),
+    nextCursor: rows.length > pageSize && last ? `${last.doneAt.toISOString()}_${last.id}` : null,
+  }
+}
+
+// Whoever logged in the apartment, whether still a member or not: a removed member's logs stay filterable.
+export async function logAuthors(apartmentId: string): Promise<LogPage['people']> {
+  return db
+    .selectDistinct({ id: user.id, name: user.name })
+    .from(logs)
+    .innerJoin(user, eq(user.id, logs.doneBy))
+    .where(eq(logs.apartmentId, apartmentId))
+    .orderBy(asc(user.name), asc(user.id))
 }
 
 // The one place a log row becomes a LogEntry. Archived tasks and rooms stay, flagged: history never breaks.

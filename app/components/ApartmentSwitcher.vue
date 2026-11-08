@@ -21,7 +21,6 @@ const items = computed(() => {
   groups.push(
     [
       { label: 'Nouvel appartement', to: '/onboarding' },
-      { label: 'Tâches', to: `/a/${current.value?.id}/tasks` },
       { label: 'Réglages', to: `/a/${current.value?.id}/settings` },
     ],
     [{ label: 'Se déconnecter', onSelect: signOut }],
