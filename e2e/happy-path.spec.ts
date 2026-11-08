@@ -11,7 +11,7 @@ async function goto(page: Page, path: string) {
 }
 
 // One path through the app, on a phone, as a new user: each run signs up a fresh account, so it needs no reset.
-test('sign up, set up a flat and log a chore from Home', async ({ page }) => {
+test('sign up, set up a flat, log a chore from Home and find it in Historique', async ({ page }) => {
   const name = 'Ana'
 
   await goto(page, '/signup')
@@ -43,4 +43,11 @@ test('sign up, set up a flat and log a chore from Home', async ({ page }) => {
   await expect(task).toContainText(`À l'instant · ${name}`)
   // exact: the toast's hidden screen-reader announcement contains the same text, prefixed with « Notification ».
   await expect(page.getByText('Passer le balai · noté', { exact: true })).toBeVisible()
+
+  // The bottom bar, by its top edge: under `pnpm dev`, Nuxt DevTools' button covers the middle of the bar.
+  await page.getByRole('link', { name: 'Historique' }).click({ position: { x: 16, y: 8 } })
+  await expect(page).toHaveURL(new RegExp(`${home}/feed$`))
+  await expect(page.getByRole('heading', { name: 'Aujourd\'hui' })).toBeVisible()
+  await expect(page.getByRole('button', { name: new RegExp(`${name} · Passer le balai · Tout l'appartement · \\d{2}:\\d{2}`) }))
+    .toBeVisible()
 })
