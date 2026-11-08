@@ -1,6 +1,6 @@
 ---
 type: decision
-status: recommended
+status: decided
 date: 2026-11-08
 area: product
 tags:
@@ -23,7 +23,7 @@ A chip logs at once and closes the sheet: task, then room, two taps. « Tout l'a
 
 ## Consequences
 
-- [[Screens#The quick-log flow]] step 3 changes accordingly (on Leo's OK)
+- [[Screens#The quick-log flow]] step 3 says so (updated 2026-11-08)
 - Closing the sheet logs nothing
 - [[M3 Logging and feed tech prep#Home and the quick-log flow]]
 
