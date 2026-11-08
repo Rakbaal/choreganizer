@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import { apartments, memberships, rooms, taskRooms, tasks, user } from '../database/schema'
+import { apartments, logRooms, logs, memberships, rooms, taskRooms, tasks, user } from '../database/schema'
 import { db } from '../utils/db'
 import type { Role } from '../utils/membership'
 
@@ -34,6 +34,23 @@ export async function createTask(apartmentId: string, name: string, opts: { allR
     .returning()
   if (opts.roomIds?.length) {
     await db.insert(taskRooms).values(opts.roomIds.map(roomId => ({ taskId: row!.id, roomId })))
+  }
+  return row!
+}
+
+// A direct insert, bypassing createLog's rules: a test can write logs sharing one done_at.
+export async function insertLog(
+  apartmentId: string,
+  taskId: string,
+  doneBy: string,
+  opts: { doneAt?: Date, roomIds?: string[], note?: string } = {},
+) {
+  const [row] = await db
+    .insert(logs)
+    .values({ apartmentId, taskId, doneBy, doneAt: opts.doneAt ?? new Date(), note: opts.note ?? null })
+    .returning()
+  if (opts.roomIds?.length) {
+    await db.insert(logRooms).values(opts.roomIds.map(roomId => ({ logId: row!.id, roomId })))
   }
   return row!
 }

@@ -7,3 +7,11 @@ export type LogEntry = {
   // By room position. [] means « Tout l'appartement ».
   rooms: { id: string, name: string, archived: boolean }[]
 }
+
+export type LogPage = {
+  items: LogEntry[]
+  // null: this is the last page.
+  nextCursor: string | null
+  // Everyone who logged in the apartment, by name, removed members included: the person filter's list.
+  people: { id: string, name: string }[]
+}

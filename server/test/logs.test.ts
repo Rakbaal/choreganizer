@@ -1,11 +1,11 @@
 import { eq } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
 // Relative, not #shared: plain Vitest has no alias, and logSchema is a value import.
-import { logSchema } from '../../shared/schemas/logs'
-import { logRooms, logs, rooms } from '../database/schema'
+import { feedQuerySchema, logSchema } from '../../shared/schemas/logs'
+import { logRooms, logs, memberships, rooms } from '../database/schema'
 import { db } from '../utils/db'
-import { createLog } from '../utils/logs'
-import { createApartment, createRoom, createTask, createUser } from './factories'
+import { createLog, listLogs, logAuthors } from '../utils/logs'
+import { addMember, createApartment, createRoom, createTask, createUser, insertLog } from './factories'
 
 async function setup() {
   const user = await createUser('Alice')
@@ -199,5 +199,88 @@ describe('logSchema', () => {
 
   it('trims a blank note to an empty string', () => {
     expect(logSchema.parse({ ...valid, note: '  ' }).note).toBe('')
+  })
+})
+
+describe('listLogs', () => {
+  it('filters a room with its logs and the whole-flat ones, not another room\'s', async () => {
+    const { user, apartment } = await setup()
+    const cuisine = await createRoom(apartment.id, 'Cuisine')
+    const salon = await createRoom(apartment.id, 'Salon')
+    const task = await createTask(apartment.id, 'Balai', { allRooms: true })
+    const wholeFlat = await insertLog(apartment.id, task.id, user.id)
+    const inCuisine = await insertLog(apartment.id, task.id, user.id, { roomIds: [cuisine.id] })
+    await insertLog(apartment.id, task.id, user.id, { roomIds: [salon.id] })
+    const inBoth = await insertLog(apartment.id, task.id, user.id, { roomIds: [cuisine.id, salon.id] })
+
+    const page = await listLogs(apartment.id, { roomId: cuisine.id })
+
+    expect(page.items.map(item => item.id).sort()).toEqual([wholeFlat.id, inCuisine.id, inBoth.id].sort())
+  })
+
+  it('walks three pages of logs sharing one done_at with no duplicate and no gap', async () => {
+    const { user, apartment } = await setup()
+    const task = await createTask(apartment.id, 'Balai', { allRooms: true })
+    const doneAt = new Date('2026-11-07T18:40:00.123Z')
+    const ids = []
+    for (let i = 0; i < 5; i++) ids.push((await insertLog(apartment.id, task.id, user.id, { doneAt })).id)
+
+    const seen: string[] = []
+    const pages: number[] = []
+    let query = feedQuerySchema.parse({})
+    do {
+      const page = await listLogs(apartment.id, query, 2)
+      seen.push(...page.items.map(item => item.id))
+      pages.push(page.items.length)
+      query = feedQuerySchema.parse(page.nextCursor ? { cursor: page.nextCursor } : {})
+    } while (query.cursor && pages.length < 10)
+
+    expect(pages).toEqual([2, 2, 1])
+    expect(seen).toEqual([...ids].sort().reverse())
+  })
+
+  it('filters by person and task, and never shows another apartment\'s logs', async () => {
+    const { user: alice, apartment } = await setup()
+    const bob = await createUser('Bob')
+    await addMember(apartment.id, bob.id)
+    const balai = await createTask(apartment.id, 'Balai', { allRooms: true })
+    const vitres = await createTask(apartment.id, 'Vitres', { allRooms: true })
+    const bobsBalai = await insertLog(apartment.id, balai.id, bob.id)
+    await insertLog(apartment.id, balai.id, alice.id)
+    await insertLog(apartment.id, vitres.id, bob.id)
+    const other = await setup()
+    const otherTask = await createTask(other.apartment.id, 'Balai', { allRooms: true })
+    await insertLog(other.apartment.id, otherTask.id, other.user.id)
+
+    const page = await listLogs(apartment.id, { userId: bob.id, taskId: balai.id })
+
+    expect(page.items.map(item => item.id)).toEqual([bobsBalai.id])
+    expect(page.nextCursor).toBeNull()
+    expect((await listLogs(apartment.id, {})).items).toHaveLength(3)
+  })
+})
+
+describe('feedQuerySchema', () => {
+  it('refuses a malformed cursor', () => {
+    expect(feedQuerySchema.safeParse({ cursor: 'nope' }).success).toBe(false)
+    expect(feedQuerySchema.safeParse({ cursor: '2026-11-07T18:40:00.123Z_not-a-uuid' }).success).toBe(false)
+  })
+})
+
+describe('logAuthors', () => {
+  it('lists each author once by name, a removed member included', async () => {
+    const { user: alice, apartment } = await setup()
+    const bob = await createUser('Bob')
+    await addMember(apartment.id, bob.id)
+    const task = await createTask(apartment.id, 'Balai', { allRooms: true })
+    await insertLog(apartment.id, task.id, bob.id)
+    await insertLog(apartment.id, task.id, bob.id)
+    await insertLog(apartment.id, task.id, alice.id)
+    await db.delete(memberships).where(eq(memberships.userId, bob.id))
+
+    expect(await logAuthors(apartment.id)).toEqual([
+      { id: alice.id, name: 'Alice' },
+      { id: bob.id, name: 'Bob' },
+    ])
   })
 })
