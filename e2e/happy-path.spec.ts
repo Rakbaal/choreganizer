@@ -41,5 +41,6 @@ test('sign up, set up a flat and log a chore from Home', async ({ page }) => {
   await expect(task).toContainText('Jamais fait')
   await task.click()
   await expect(task).toContainText(`À l'instant · ${name}`)
-  await expect(page.getByText('Passer le balai · noté')).toBeVisible()
+  // exact: the toast's hidden screen-reader announcement contains the same text, prefixed with « Notification ».
+  await expect(page.getByText('Passer le balai · noté', { exact: true })).toBeVisible()
 })
