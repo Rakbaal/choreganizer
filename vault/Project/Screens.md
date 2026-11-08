@@ -20,7 +20,7 @@ Five screens. The home screen is the logging screen, not a dashboard, because lo
 
 1. Tap a task on Home.
 2. If the task has exactly one eligible room, it's logged immediately.
-3. Otherwise a bottom sheet shows room chips plus **Whole flat** (anywhere tasks) or **All of them** (room-specific tasks, see [[Room-specific logs need a room]]); pick one or more, tap **Done**.
+3. Otherwise a bottom sheet shows room chips plus **Whole flat** (anywhere tasks) or **All of them** (room-specific tasks, see [[Room-specific logs need a room]]); tapping a chip logs at once. With three or more rooms, **Several rooms…** turns the chips into toggles with **Done**, for a hand-picked subset ([[Room chips log at once]]).
 4. The button shows done at once ([[Optimistic logging]]); a toast confirms with **Undo** (deletes the log) and **Edit** (change when, add a note).
 
 Defaults do the work: done by me ([[Log only for yourself|always]]), done now. Changing the time is possible but never required.

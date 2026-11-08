@@ -23,6 +23,7 @@ Tech prep: [[M3 Logging and feed tech prep]]
 - [ ] "Last done X ago by Y" on task buttons, so you see when the other person just did it
 - [ ] Feed grouped by day, cursor pagination, filters (room filter includes whole-flat logs)
 - [ ] Edit / delete a log; log in the past
+- [ ] Edit the apartment's timezone in settings (the feed's day grouping is its first use)
 
 ## Done when
 
