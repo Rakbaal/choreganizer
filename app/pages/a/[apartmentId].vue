@@ -12,6 +12,9 @@ async function syncApartment() {
 await syncApartment()
 // Switching apartments can reuse this page.
 watch(() => apartment.value?.id, syncApartment)
+
+// Lifts the toasts above the bottom bar (main.css), on apartment pages only.
+useHead({ bodyAttrs: { class: 'has-bottom-nav' } })
 </script>
 
 <template>
@@ -29,8 +32,10 @@ watch(() => apartment.value?.id, syncApartment)
         Archivé
       </UBadge>
     </header>
-    <UContainer class="w-full flex-1 py-6">
+    <!-- Room for the fixed bottom bar: its 4rem, the safe area, then the usual 1.5rem. -->
+    <UContainer class="w-full flex-1 pt-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
       <NuxtPage />
     </UContainer>
+    <BottomNav />
   </div>
 </template>

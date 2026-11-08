@@ -1,2 +1,11 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+
+:root {
+  --toast-bottom: 1rem;
+}
+
+/* The apartment shell's bottom bar (BottomNav.vue): 4rem plus the safe area. Toasts sit 1rem above it. */
+body.has-bottom-nav {
+  --toast-bottom: calc(5rem + env(safe-area-inset-bottom));
+}
