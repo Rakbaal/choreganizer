@@ -1,6 +1,6 @@
 // Local data to click through the app: pnpm db:seed. Relative imports: tsx runs this outside Nuxt.
 import { eq, inArray, or, sql } from 'drizzle-orm'
-import { apartments, invites, memberships, rooms, user } from '../server/database/schema'
+import { apartments, invites, memberships, rooms, taskRooms, tasks, user } from '../server/database/schema'
 import { auth } from '../server/utils/auth'
 import { db } from '../server/utils/db'
 
@@ -37,8 +37,17 @@ await db.insert(memberships).values([
   { apartmentId: SEED_APARTMENT_ID, userId: alice.id, role: 'owner' },
   { apartmentId: SEED_APARTMENT_ID, userId: bob.id, role: 'member' },
 ])
-await db.insert(rooms).values(
+const seedRooms = await db.insert(rooms).values(
   ['Cuisine', 'Salon', 'Salle de bain', 'Chambre', 'Entrée'].map((name, position) => ({ apartmentId: SEED_APARTMENT_ID, name, position })),
+).returning()
+const seedTasks = await db.insert(tasks).values([
+  { apartmentId: SEED_APARTMENT_ID, name: 'Passer le balai', allRooms: true, frequencyInterval: 1, frequencyUnit: 'week' as const, position: 0 },
+  { apartmentId: SEED_APARTMENT_ID, name: 'Nettoyer les vitres', allRooms: false, frequencyInterval: 1, frequencyUnit: 'month' as const, position: 1 },
+  { apartmentId: SEED_APARTMENT_ID, name: 'Sortir les poubelles', allRooms: true, position: 2 },
+]).returning()
+const vitres = seedTasks.find(task => task.name === 'Nettoyer les vitres')!
+await db.insert(taskRooms).values(
+  seedRooms.filter(room => room.name === 'Cuisine' || room.name === 'Salon').map(room => ({ taskId: vitres.id, roomId: room.id })),
 )
 // A fixed 12-character code, so the README can give the link.
 await db.insert(invites).values({ code: 'invitedetest', apartmentId: SEED_APARTMENT_ID, createdBy: alice.id, expiresAt: sql`now() + interval '7 days'` })
@@ -47,6 +56,7 @@ console.log(`Seeded « Appartement de test », password « ${PASSWORD} »:
   alice@example.test (owner)
   bob@example.test (member)
   rooms: Cuisine, Salon, Salle de bain, Chambre, Entrée
+  tasks: Passer le balai (partout, chaque semaine), Nettoyer les vitres (Cuisine, Salon, chaque mois), Sortir les poubelles (partout, au besoin)
   invite: http://localhost:3000/join/invitedetest (unused, valid 7 days)`)
 // db.ts keeps its pool open; nothing else to wait for.
 process.exit(0)

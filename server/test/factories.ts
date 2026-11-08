@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import { apartments, memberships, rooms, user } from '../database/schema'
+import { apartments, memberships, rooms, taskRooms, tasks, user } from '../database/schema'
 import { db } from '../utils/db'
 import type { Role } from '../utils/membership'
 
@@ -23,5 +23,17 @@ export async function addMember(apartmentId: string, userId: string, role: Role 
 
 export async function createRoom(apartmentId: string, name: string, opts: { archived?: boolean } = {}) {
   const [row] = await db.insert(rooms).values({ apartmentId, name, archivedAt: opts.archived ? new Date() : null }).returning()
+  return row!
+}
+
+// Inserts task_rooms directly, bypassing setTaskRooms: a test can link an archived room.
+export async function createTask(apartmentId: string, name: string, opts: { allRooms?: boolean, archived?: boolean, roomIds?: string[] } = {}) {
+  const [row] = await db
+    .insert(tasks)
+    .values({ apartmentId, name, allRooms: opts.allRooms ?? false, archivedAt: opts.archived ? new Date() : null })
+    .returning()
+  if (opts.roomIds?.length) {
+    await db.insert(taskRooms).values(opts.roomIds.map(roomId => ({ taskId: row!.id, roomId })))
+  }
   return row!
 }

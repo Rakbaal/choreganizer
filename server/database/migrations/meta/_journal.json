@@ -29,6 +29,13 @@
       "when": 1793569728915,
       "tag": "0003_lonely_molten_man",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794144570802,
+      "tag": "0004_friendly_penance",
+      "breakpoints": true
     }
   ]
 }
