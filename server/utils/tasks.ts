@@ -62,8 +62,8 @@ export async function activeTaskRooms(executor: Tx | typeof db, taskIds: string[
 
 // Per task, whatever the log's rooms, and by done_at: a log dated in the past counts from that date. No apartment
 // filter: the task ids already come from one apartment.
-export async function lastLogs(executor: Tx | typeof db, taskIds: string[]): Promise<Map<string, { doneAt: string, by: { id: string, name: string } }>> {
-  const map = new Map<string, { doneAt: string, by: { id: string, name: string } }>()
+export async function lastLogs(executor: Tx | typeof db, taskIds: string[]): Promise<Map<string, NonNullable<Task['lastLog']>>> {
+  const map = new Map<string, NonNullable<Task['lastLog']>>()
   if (!taskIds.length) return map
   // distinct on keeps the first row of each task_id in this order: the latest done_at, ties broken by id.
   const rows = await executor
@@ -78,7 +78,7 @@ export async function lastLogs(executor: Tx | typeof db, taskIds: string[]): Pro
   return map
 }
 
-export function toTask(row: typeof tasks.$inferSelect, rooms: { id: string, name: string }[]): Task {
+export function toTask(row: typeof tasks.$inferSelect, rooms: { id: string, name: string }[], lastLog: Task['lastLog']): Task {
   return {
     id: row.id,
     name: row.name,
@@ -86,6 +86,7 @@ export function toTask(row: typeof tasks.$inferSelect, rooms: { id: string, name
     frequency: row.frequencyUnit ? { interval: row.frequencyInterval!, unit: row.frequencyUnit } : null,
     allRooms: row.allRooms,
     rooms,
+    lastLog,
     position: row.position,
     archivedAt: row.archivedAt?.toISOString() ?? null,
   }

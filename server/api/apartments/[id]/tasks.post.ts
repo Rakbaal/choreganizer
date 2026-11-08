@@ -16,7 +16,8 @@ export default defineEventHandler(async (event) => {
       return row!
     })
     setResponseStatus(event, 201)
-    return toTask(task, (await activeTaskRooms(db, [task.id])).get(task.id) ?? [])
+    // Created in this request: no log yet.
+    return toTask(task, (await activeTaskRooms(db, [task.id])).get(task.id) ?? [], null)
   }
   catch (error) {
     if (isUniqueViolation(error, 'tasks_active_name_idx')) throw duplicateTaskName(body.name)

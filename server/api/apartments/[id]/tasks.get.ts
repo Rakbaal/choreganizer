@@ -14,6 +14,8 @@ export default defineEventHandler(async (event) => {
       sql`case when ${tasks.archivedAt} is null then ${tasks.position} end`,
       tasks.name,
     )
-  const rooms = await activeTaskRooms(db, rows.map(row => row.id))
-  return rows.map(row => toTask(row, rooms.get(row.id) ?? []))
+  const ids = rows.map(row => row.id)
+  const rooms = await activeTaskRooms(db, ids)
+  const lastDone = await lastLogs(db, ids)
+  return rows.map(row => toTask(row, rooms.get(row.id) ?? [], lastDone.get(row.id) ?? null))
 })
