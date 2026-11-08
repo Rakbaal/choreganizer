@@ -1,9 +1,9 @@
 // Explicit imports, not Nitro's auto-imports: the tests load this file with plain Vitest.
-import { and, eq, inArray, isNull, notInArray, sql } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNull, notInArray, sql } from 'drizzle-orm'
 import { createError } from 'h3'
 import type { TaskInput } from '#shared/schemas/tasks'
 import type { Task } from '#shared/types/tasks'
-import { rooms, taskRooms, tasks } from '../database/schema'
+import { logs, rooms, taskRooms, tasks, user } from '../database/schema'
 import type { db } from './db'
 
 export type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0]
@@ -60,7 +60,25 @@ export async function activeTaskRooms(executor: Tx | typeof db, taskIds: string[
   return map
 }
 
-export function toTask(row: typeof tasks.$inferSelect, rooms: { id: string, name: string }[]): Task {
+// Per task, whatever the log's rooms, and by done_at: a log dated in the past counts from that date. No apartment
+// filter: the task ids already come from one apartment.
+export async function lastLogs(executor: Tx | typeof db, taskIds: string[]): Promise<Map<string, NonNullable<Task['lastLog']>>> {
+  const map = new Map<string, NonNullable<Task['lastLog']>>()
+  if (!taskIds.length) return map
+  // distinct on keeps the first row of each task_id in this order: the latest done_at, ties broken by id.
+  const rows = await executor
+    .selectDistinctOn([logs.taskId], { taskId: logs.taskId, doneAt: logs.doneAt, byId: user.id, byName: user.name })
+    .from(logs)
+    .innerJoin(user, eq(user.id, logs.doneBy))
+    .where(inArray(logs.taskId, taskIds))
+    .orderBy(logs.taskId, desc(logs.doneAt), desc(logs.id))
+  for (const { taskId, doneAt, byId, byName } of rows) {
+    map.set(taskId, { doneAt: doneAt.toISOString(), by: { id: byId, name: byName } })
+  }
+  return map
+}
+
+export function toTask(row: typeof tasks.$inferSelect, rooms: { id: string, name: string }[], lastLog: Task['lastLog']): Task {
   return {
     id: row.id,
     name: row.name,
@@ -68,6 +86,7 @@ export function toTask(row: typeof tasks.$inferSelect, rooms: { id: string, name
     frequency: row.frequencyUnit ? { interval: row.frequencyInterval!, unit: row.frequencyUnit } : null,
     allRooms: row.allRooms,
     rooms,
+    lastLog,
     position: row.position,
     archivedAt: row.archivedAt?.toISOString() ?? null,
   }

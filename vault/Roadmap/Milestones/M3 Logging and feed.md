@@ -19,7 +19,7 @@ Tech prep: [[M3 Logging and feed tech prep]] · Plan: [[M3 Logging and feed mast
 
 ## Tasks
 
-- [ ] Tables `logs`, `log_rooms`
+- [x] Tables `logs`, `log_rooms`
 - [ ] Quick-log flow with room sheet, Undo and Edit, optimistic ([[Screens#The quick-log flow]], [[Optimistic logging]])
 - [ ] "Last done X ago by Y" on task buttons, so you see when the other person just did it
 - [ ] Feed grouped by day, cursor pagination, filters (room filter includes whole-flat logs)

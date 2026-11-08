@@ -3,8 +3,9 @@ import { describe, expect, it } from 'vitest'
 import { rooms, taskRooms } from '../database/schema'
 import { db } from '../utils/db'
 import { isUniqueViolation } from '../utils/db-errors'
-import { activeTaskRooms, setTaskRooms } from '../utils/tasks'
-import { createApartment, createRoom, createTask, createUser } from './factories'
+import { createLog } from '../utils/logs'
+import { activeTaskRooms, lastLogs, setTaskRooms } from '../utils/tasks'
+import { addMember, createApartment, createRoom, createTask, createUser } from './factories'
 
 async function setup() {
   const owner = await createUser()
@@ -102,5 +103,48 @@ describe('tasks_active_name_idx', () => {
     await createTask(apartment.id, 'Balai', { archived: true })
 
     await expect(createTask(apartment.id, 'Balai')).resolves.toMatchObject({ name: 'Balai' })
+  })
+})
+
+describe('lastLogs', () => {
+  const hour = 60 * 60 * 1000
+
+  function log(apartmentId: string, userId: string, taskId: string, doneAt: Date) {
+    return createLog({ taskId, roomIds: [], doneAt: doneAt.toISOString() }, { apartmentId, userId })
+  }
+
+  it('returns the latest log by done_at, not by insertion, with its author', async () => {
+    const alice = await createUser('Alice')
+    const bob = await createUser('Bob')
+    const apartment = await createApartment(alice.id)
+    await addMember(apartment.id, bob.id)
+    const task = await createTask(apartment.id, 'Balai', { allRooms: true })
+    const today = new Date()
+    await log(apartment.id, alice.id, task.id, today)
+    await log(apartment.id, bob.id, task.id, new Date(today.getTime() - 48 * hour))
+
+    const last = await lastLogs(db, [task.id])
+
+    expect(last.get(task.id)).toEqual({ doneAt: today.toISOString(), by: { id: alice.id, name: 'Alice' } })
+  })
+
+  it('gives each task its own, and none to a task never done', async () => {
+    const alice = await createUser('Alice')
+    const bob = await createUser('Bob')
+    const apartment = await createApartment(alice.id)
+    await addMember(apartment.id, bob.id)
+    const balai = await createTask(apartment.id, 'Balai', { allRooms: true })
+    const vitres = await createTask(apartment.id, 'Vitres', { allRooms: true })
+    const poubelles = await createTask(apartment.id, 'Poubelles', { allRooms: true })
+    const yesterday = new Date(Date.now() - 24 * hour)
+    const threeDaysAgo = new Date(Date.now() - 72 * hour)
+    await log(apartment.id, alice.id, balai.id, yesterday)
+    await log(apartment.id, bob.id, vitres.id, threeDaysAgo)
+
+    const last = await lastLogs(db, [balai.id, vitres.id, poubelles.id])
+
+    expect(last.get(balai.id)).toEqual({ doneAt: yesterday.toISOString(), by: { id: alice.id, name: 'Alice' } })
+    expect(last.get(vitres.id)).toEqual({ doneAt: threeDaysAgo.toISOString(), by: { id: bob.id, name: 'Bob' } })
+    expect(last.has(poubelles.id)).toBe(false)
   })
 })

@@ -15,7 +15,11 @@ export default defineEventHandler(async (event) => {
   const body = await readValidatedBody(event, updateTaskSchema.parse)
 
   async function respond(row: typeof tasks.$inferSelect) {
-    return toTask(row, (await activeTaskRooms(db, [row.id])).get(row.id) ?? [])
+    return toTask(
+      row,
+      (await activeTaskRooms(db, [row.id])).get(row.id) ?? [],
+      (await lastLogs(db, [row.id])).get(row.id) ?? null,
+    )
   }
 
   if ('name' in body) {
