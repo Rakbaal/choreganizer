@@ -1,6 +1,6 @@
 ---
 name: obsidian-implement-step
-description: Implement one prepared step of a Choreganizer implementation plan (Obsidian vault, vault/Plans/<Project>/) end to end, in a fresh session. It checks nothing blocking is left, decides the branch, base and stack target, and writes a short commit-by-commit plan against the real code, held for approval in plan mode only when the step is stale or risky; then the same session creates the branch, implements the step as a clean series of commits, verifies it, opens its draft PR, stacks it with gh stack, and updates the step note. Use when asked to "implement step N", "build step N", "ship the next step", or /obsidian-implement-step in choreganizer. Not for settling questions (obsidian-prepare-step) or reconciling the plan (obsidian-step-done).
+description: Implement one step of a Choreganizer implementation plan (Obsidian vault, vault/Plans/<Project>/) end to end, in a fresh session. It details a light step against the real code and settles its open questions with Leo in one round, decides the branch, base and stack target, and writes a short commit-by-commit plan, held for approval in plan mode only when the step is risky; then the same session creates the branch, implements the step as a clean series of commits, verifies it, opens its draft PR, stacks it with gh stack, and updates the step note. Use when asked to "implement step N", "build step N", "ship the next step", or /obsidian-implement-step in choreganizer. Not for reconciling the plan (obsidian-step-done).
 argument-hint: "[step note name or path | step number] [project]"
 model: opus
 ---
@@ -9,9 +9,11 @@ model: opus
 
 Input: $ARGUMENTS
 
-Plans live in `vault/Plans/<Project>/` (master + `Steps/`), written by `obsidian-implementation-plan`, prepared by `obsidian-prepare-step`, kept in sync by `obsidian-step-done`. This skill takes one `ready` step to "draft PR in its stack".
+Plans live in `vault/Plans/<Project>/` (master + `Steps/`), written by `obsidian-implementation-plan`, kept in sync by `obsidian-step-done`. This skill takes one step, `light` or `ready`, to "draft PR in its stack".
 
-It runs in a **fresh session**. Phases 1 to 4 are read-only and always run; Phase 4 picks the mode. A **full** run holds the plan for approval in plan mode. A **light** run prints it as a pre-flight and goes straight on to Phases 5 to 8, since `obsidian-prepare-step` already settled the step with Leo. If this session already settled questions or discussed the step at length, say so and suggest starting over in a fresh one.
+**This is where the work goes.** Leo's workflow puts its effort in the tech prep and here; the plan in between is quick and its steps are few and large (often a whole milestone in 1–3 steps). So this skill details the step itself against the code, settles what's left with Leo in one round of questions, then builds the whole step. Leo trusts the result: don't send him to another session or skill unless something below says to stop. `/obsidian-prepare-step` is optional; when it already ran, the step arrives `ready` and Phase 2 has little to do.
+
+It runs in a **fresh session**. Phases 1 to 4 write only to the step and master notes on disk (no branch, no code); Phase 4 picks the mode. A **full** run holds the plan for approval in plan mode. A **light** run prints it as a pre-flight and goes straight on to Phases 5 to 8. If this session already discussed the step at length, say so and suggest starting over in a fresh one.
 
 **Read `.claude/skills/obsidian-tech-prep/references/vault-conventions.md` first** (properties, branches, vault commits).
 
@@ -25,17 +27,20 @@ The repo is a single checkout: `/home/leo-carpentier/dev/choreganizer`. Obsidian
 2. Read from disk the step note and the master in full, the `D<n>` decisions the step cites (and their Decision notes), the `Project/` sections it links, and the `Provides` of the steps it `Consumes` from. Never work from an in-context copy.
 3. Read its properties: `branch`, `base`, `stack`, `status`, `prepared`, `pr`.
 
-## Phase 2 — Gate: the step must be prepared
+## Phase 2 — Detail the step and settle its questions
 
 First, the repo itself: if `git -C /home/leo-carpentier/dev/choreganizer rev-parse` fails or there is no `origin` remote, this is [[M0 Skeleton]]'s repo setup. Ask Leo before anything: `git init -b master`, a first commit of what is already there (the vault without `vault/Plans/`, `.claude/`, `CLAUDE.md`, `.gitignore`), then `gh repo create Choreganizer --private --source . --push`. Creating the GitHub repo is outward-facing: run it only on his explicit OK, then continue with the step on a branch off that first commit.
 
-`git -C /home/leo-carpentier/dev/choreganizer fetch origin`, then look for any of these:
-- `status` is `light`, or `Changes`, `Tests` or `Verification` still holds the placeholder `_Detailed when the step starts…_`.
-- A master ❓ item not struck through that names this step, a `Risks / open points` line pointing to one or saying "settle before…", a `Changes` item that hedges ("A or B", "TBD", "?"), a Decision note it relies on still `status: open`.
-- The base branch, or the branch of a step this one depends on, is not on `origin`.
-- A `Consumes` line that no longer matches the code on the base.
+`git -C /home/leo-carpentier/dev/choreganizer fetch origin`. Find the code to work against: `origin/<base>` if it exists, else the local `<base>` branch (Phase 3 settles the base for good; a parent step's PR that merged meanwhile means `origin/master`). Read code with `git show <ref>:<path>`; don't switch branches yet.
 
-If any is found, list them and stop: tell Leo to run `/obsidian-prepare-step <N> <Project>` in another session, then come back to a fresh one. Don't settle them here.
+1. **Stop only for a missing prerequisite.** The base branch, or the branch of a step this one depends on, is on neither `origin` nor local: report it and stop. Nothing else in this phase stops the skill.
+2. **Detail what is light.** Any `Changes`, `Tests`, `Verification` or `Standalone check` section (or `### <part>` under it) still holding the placeholder `_Detailed when the step starts…_` gets written from the step template (`.claude/skills/obsidian-implementation-plan/references/step-template.md`) against that code: real paths, real type and function names, the vault section or Decision note each rule implements, `**new**` on files that don't exist yet. Parts already detailed stay as written unless the code contradicts them. Also read the code the step will mirror (an existing route, page, component), as Phase 4 does: do it once, here.
+3. **Collect every blocker before asking anything:**
+   - master ❓ items not struck through that name this step; `Risks / open points` lines pointing to one or saying "decide when detailing" / "settle before…"; `Changes` items that hedge ("A or B", "TBD", "?"); Decision notes it relies on still `status: open`
+   - design gaps: a rule the step implements that the `Project/` notes leave ambiguous or contradict each other on (an error message, a permission, a limit), or user-visible French copy nobody chose
+   - stale assumptions: a `Consumes` line that no longer matches the code on the base
+4. **Settle them in one round.** For each, do the homework first (code and vault, `path:line`, `[[Note#Heading]]`), then ask with AskUserQuestion, recommended option first, standalone questions, up to 4 per call. Decide yourself what only shapes private code (naming, helper layout, test structure) and list it under "Found" at the end. If Leo defers a question that blocks part of the step, build the rest and leave that part unticked, stated under "Blocked on me".
+5. **Record**, on disk: master ❓ struck through with `**Settled <YYYY-MM-DD>**: <decision>`; the step's `Changes` updated; a `## Deviations` line for each answer that departs from the step or a `D<n>`; a Decision note an answer settles (tracked: committed in Phase 5's first vault commit). Set the step's `status: ready` and `prepared:` to today.
 
 ## Phase 3 — Branch, base and stack target
 
@@ -64,27 +69,27 @@ Decide all of these now, read-only. They go into the plan.
 
 1. Read the root `CLAUDE.md`, `README.md`, `package.json` (its scripts are the verification commands) and `nuxt.config.ts`.
 2. Read the gh-stack skill when the step stacks: `~/dev/leexi-ai/leexi/.claude/skills/gh-stack/SKILL.md` (if missing, `gh stack --help`).
-3. Read the code each `Changes` item touches, on the base (`git show origin/<base>:<path>`, or in the checkout if it is already on the branch), and the code the step mirrors (an existing route under `server/api/`, an existing page, the Nuxt UI component it reuses).
+3. Read what Phase 2 didn't already: the code each `Changes` item touches, on the base (`git show origin/<base>:<path>`, or in the checkout if it is already on the branch), and the code the step mirrors (an existing route under `server/api/`, an existing page, the Nuxt UI component it reuses).
 4. Write the plan. The step note stays the source of truth for **what** is built; the plan says only what the step note doesn't, and points to step items instead of restating them:
    - **Setup:** branch (new | resume: what exists), base, branch command, PR target, label. One line each.
    - **Commits**, in dependency order. Each one is a logical unit a reviewer can read on its own and carries its own tests: e.g. schema change + generated migration, then the server util + its tests, then the route with its Zod schema, then the screen. Neither one commit for the whole step nor one per file. For each: message, the step's `Changes` / `Tests` items it covers, and the files it touches only when the step doesn't name them.
    - **Differs from the step note:** each place where the code or the base makes the plan depart from the step (a path moved, a signature changed, an extra file is needed, the base changed), with the `## Deviations` line it will get. `None` when nothing differs.
    - **Vault edits:** only when this is the plan's first step (master and milestone `status: in-progress`). The step's own status, ticks and `pr:` are routine (Phases 5 and 8): don't list them.
    - **Verification:** only commands beyond the step's `Verification` and the Phase 7 list.
-   - **Uncertain:** anything the step and the code don't settle (see Phase 6), with your recommendation. Ask these with AskUserQuestion before going on, in either mode.
+   - **Uncertain:** normally empty, since Phase 2 settled the step. Anything still open (see Phase 6), with your recommendation: ask it with AskUserQuestion before going on, in either mode.
 5. Pick the mode. **Full** when the session was started in plan mode, Leo asked for it, or any of these holds:
    - Phase 3 resumes an existing branch, or the base differs from the step's `base:`.
    - The code changed since the step was prepared: `git log origin/<base> --since=<prepared> --oneline -- <paths from Changes>` is not empty. No `prepared:` property counts as changed.
    - `Differs from the step note` or `Uncertain` is not empty after the questions are answered.
    - The step adds a migration, changes authorization (Better Auth config, `requireUser` / `requireMembership`, a permission), adds a dependency, or touches the deploy setup (Vercel, env vars, CI).
 
-   Otherwise **light**.
+   Otherwise **light**. Having detailed the step in Phase 2 is not a trigger by itself: Leo answered its questions there.
 6. **Full:** if the session is not in plan mode, EnterPlanMode, then ExitPlanMode with the plan. Leo approves, usually choosing auto mode, or sends it back with edits. **Light:** print the plan under `Pre-flight`, with one line saying no full-mode trigger was hit, and go on to Phase 5 without waiting.
 
 ## Phase 5 — Implement
 
-1. Run the branch command. First vault commit: Leo's pending tracked vault edits (checkpoint, if any), then the milestone's `status: in-progress` when it was `todo`. Message `implement-step: <Project> step <N> started`. On disk (not committed): the step's and master's `status: in-progress`, and each `Differs from the step note` line appended to the step's `## Deviations`.
-2. Build exactly the step's `Changes` and `Tests`, in the planned commit order. The step note is the checklist: tick its `Changes` and `Tests` boxes as they land (on disk only).
+1. Run the branch command. First vault commit: Leo's pending tracked vault edits (checkpoint, if any), then any Decision note Phase 2 settled, then the milestone's `status: in-progress` when it was `todo`. Message `implement-step: <Project> step <N> started`. On disk (not committed): the step's and master's `status: in-progress`, and each `Differs from the step note` line appended to the step's `## Deviations`.
+2. Build exactly the step's `Changes` and `Tests`, in the planned commit order. The step note is the checklist: tick its `Changes` and `Tests` boxes as they land (on disk only). A step is often large: commit each logical unit as soon as it is green, and tick its boxes then, so the step note always says how far the build got, even after the context is compacted.
    - Nothing listed in `Not in this step`. No adjacent refactor. No migration other than the ones the step lists, and never edit an applied migration.
    - Migrations are generated by Drizzle Kit from the schema, never written by hand; Better Auth's tables come from its CLI.
    - Every route checks authorization on the server ([[API#Authorization, in one helper]]): `requireMembership` on the row's `apartment_id`, `done_by` from the session ([[Log only for yourself]]). A route that trusts an id from the client is a bug, whatever the step says: stop and ask.
@@ -141,4 +146,4 @@ End with three headings:
 - **Changed**: the PR URL (draft, base), `git log --oneline origin/<base>..<branch>`, each verification command with its result line (failures verbatim), and the step note lines touched.
 - **Found**: choices made without asking, places where the code differs from the step but no deviation was logged (what, why, what it affects), and issues noticed outside the step and left alone.
 
-Then suggest `/obsidian-step-done` to reconcile the plan, and `/obsidian-prepare-step` for the next step, each in its own session.
+Then suggest `/obsidian-step-done` to reconcile the plan, then `/obsidian-implement-step <N+1> <Project>` for the next step, each in its own session.

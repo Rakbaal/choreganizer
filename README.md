@@ -32,12 +32,13 @@ The app runs on http://localhost:3000. Postgres 18 runs in Docker on port 5433 (
 | `pnpm lint` | ESLint (`@nuxt/eslint`) |
 | `pnpm typecheck` | `nuxt typecheck` (vue-tsc) |
 | `pnpm test` | Vitest, once |
+| `pnpm test:e2e` | Playwright: one happy path on a phone-sized Chromium (`e2e/`), against `pnpm dev` (reused if already running) |
 | `pnpm db:generate` | Generate a SQL migration from the Drizzle schema (`server/database/schema/`) into `server/database/migrations/` |
 | `pnpm db:migrate` | Apply pending migrations to the database in `DATABASE_URL` |
 | `pnpm db:seed` | Reset the local test users and apartment (refuses any non-local `DATABASE_URL`) |
 | `pnpm db:auth-schema` | Regenerate Better Auth's tables (`server/database/schema/auth.ts`) after changing its config in `server/utils/auth.ts`, then the migration |
 
-CI runs `lint`, `typecheck` and `test` on every pull request and on pushes to `master`.
+CI runs `lint`, `typecheck`, `test` and `test:e2e` on every pull request and on pushes to `master`.
 
 ## Tests
 
@@ -51,6 +52,14 @@ docker compose exec postgres createdb -U choreganizer choreganizer_test
 ```
 
 CI runs the same tests against a Postgres service (`.github/workflows/ci.yml`).
+
+`pnpm test:e2e` runs Playwright against `.env`'s dev database: each run signs up a new user and creates one apartment, left there. It needs Chromium once:
+
+```bash
+pnpm exec playwright install chromium
+```
+
+`e2e/` and `playwright.config.ts` are linted but not type-checked: `nuxt typecheck` only covers the Nuxt app.
 
 ## Deployment
 

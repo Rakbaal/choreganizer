@@ -1,6 +1,6 @@
 ---
 name: obsidian-prepare-step
-description: Get one step of a Choreganizer implementation plan (Obsidian vault, vault/Plans/<Project>/) ready to build, without building it. Details a light step against the real code, settles its blocking open questions with Leo, checks its prerequisites and the contracts it consumes, sets the step to ready and commits the vault notes. Ends by handing over to a fresh session running /obsidian-implement-step. Use when asked to "prepare step N", "settle the open questions of step N", "is step N ready?", or /obsidian-prepare-step in choreganizer. Not for writing a plan (obsidian-implementation-plan), building (obsidian-implement-step) or reconciling (obsidian-step-done).
+description: Optional. Get one step of a Choreganizer implementation plan (Obsidian vault, vault/Plans/<Project>/) ready to build, without building it, when Leo wants its questions settled in a separate session first; otherwise /obsidian-implement-step does this itself. Details a light step against the real code, settles its blocking open questions with Leo, checks its prerequisites and the contracts it consumes, sets the step to ready and commits the vault notes. Ends by handing over to a fresh session running /obsidian-implement-step. Use when asked to "prepare step N", "settle the open questions of step N", "is step N ready?", or /obsidian-prepare-step in choreganizer. Not for writing a plan (obsidian-implementation-plan), building (obsidian-implement-step) or reconciling (obsidian-step-done).
 argument-hint: "[step note name or path | step number] [project]"
 model: opus
 ---
@@ -9,7 +9,7 @@ model: opus
 
 Input: $ARGUMENTS
 
-Plans live in `vault/Plans/<Project>/` (master + `Steps/`), written by `obsidian-implementation-plan` and kept in sync by `obsidian-step-done`. This skill takes one step from "planned" to "ready to build": detailed, nothing blocking left open. Everything it settles is written to the step note and the master, so `/obsidian-implement-step` can start in a fresh session and lose nothing.
+Plans live in `vault/Plans/<Project>/` (master + `Steps/`), written by `obsidian-implementation-plan` and kept in sync by `obsidian-step-done`. This skill takes one step from "planned" to "ready to build": detailed, nothing blocking left open. It is **optional**: `/obsidian-implement-step` details a light step and settles its questions itself. Use this one only when Leo asks for it, e.g. to think a step through ahead of the session that builds it. Everything it settles is written to the step note and the master, so `/obsidian-implement-step` can start in a fresh session and lose nothing.
 
 **Read `.claude/skills/obsidian-tech-prep/references/vault-conventions.md` first** (properties, note format, vault commits).
 

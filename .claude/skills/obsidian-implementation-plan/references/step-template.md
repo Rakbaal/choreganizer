@@ -4,7 +4,9 @@ Note: `vault/Plans/<Project>/Steps/<Project> step <N>.md`
 
 One note per branch. With the master next to it, a fresh session should know what to build, where, and when it is done. Decisions live in the master's recap under their `D<n>` ID: cite the ID and a few words, never copy the decision. Drop sections that would be empty.
 
-**Two levels of detail.** When the plan is first written, only the first step of each stack that can start now is *detailed* (`status: ready`, or `light` if a question still blocks it). The others are *light* (`status: light`): properties, Goal, Context, Provides / Consumes, Not in this step, Risks. Their `Changes`, `Tests`, `Verification` and `Standalone check` hold the single line `_Detailed when the step starts (/obsidian-prepare-step)._`, because a file-level checklist written before the earlier steps exist goes stale.
+**Two levels of detail.** The plan writes every step *light* (`status: light`): properties, Goal, Context, Provides / Consumes, Not in this step, Risks. Their `Changes`, `Tests`, `Verification` and `Standalone check` hold the single line `_Detailed when the step starts (/obsidian-implement-step)._`, because a file-level checklist written before the code exists goes stale. `/obsidian-implement-step` (or the optional `/obsidian-prepare-step`) *details* it against the code when the step starts, and sets `status: ready`.
+
+A step usually spans several parts (a server rule, its route, a screen, a CI change). Group `Context`, `Changes` and `Tests` under `### <part>` subheadings when that keeps them readable.
 
 ````markdown
 ---
@@ -25,7 +27,7 @@ tags:
 
 [[<Project> master|Master]] · Stack <A>, step <k>/<m> · ← [[<Project> step <N-1>|Step <N-1>]] · [[<Project> step <N+1>|Step <N+1>]] →
 
-**Goal:** <one sentence: the single concern of this branch.>
+**Goal:** <one or two sentences: the slice this branch ships, what you can do once it merges.>
 
 ## Context
 - What exists when this branch starts: on master, and from earlier steps of this stack (link the step).

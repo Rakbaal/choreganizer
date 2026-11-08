@@ -58,14 +58,14 @@ Leo reviews in Obsidian: he rewrites lines, deletes sections, answers under the 
 
 On every round: make the checkpoint commit (so `git show` of it is exactly his review), **re-read the note from disk**, reconcile his edits with your next revision, and never regenerate the note from your in-context copy. Treat an edited line as a decision, not a suggestion. End with the result commit `tech-prep: <Project> round <N>`.
 
-Each round should shrink the ❓ section. When a question is answered, strike it through, record the decision, and move its substance into the body where it belongs. The tech prep is ready when nothing in ❓ blocks a first PR.
+Each round should shrink the ❓ section. When a question is answered, strike it through, record the decision, and move its substance into the body where it belongs. The tech prep is where the design time goes: the plan after it is quick and `/obsidian-implement-step` builds from it in one go, so aim to settle every question here. It is ready when nothing in ❓ blocks any PR; a question left open names the PR it blocks.
 
 ## Phase 4 — Validate
 
 Only on an explicit go-ahead ("validate it", "it's good", "go"). This replaces the Leexi "publish to Notion" phase.
 
 1. Checkpoint commit, re-read the note from disk.
-2. If a ❓ item still blocks the first PR, list it and ask whether to validate anyway.
+2. If a ❓ item still blocks a PR, list it and ask whether to validate anyway.
 3. Set `status: validated` and `date` to today.
 4. Decision notes this prep created or updated move from `recommended` to `decided` (or stay `recommended` where Leo said so). Tick the `Project/Open questions.md` items the prep settled, linking the note.
 5. Result commit: `tech-prep: <Project> validated`.
@@ -110,7 +110,7 @@ When the plan exists, its skill replaces `Plan: _not yet_` with the link.
 
 **Adapt the middle sections to the milestone.** The headings are a menu, not a form. M0 turns on the setup and hosting constraints; M1 and M2 on tables, routes and authorization; M3 on the quick-log flow, the feed query and the tap count; M4 on the PWA and empty states. Leading with a "what already exists, don't rebuild" table is often the most useful opening. Drop sections that would be empty.
 
-**PR stack format.** A numbered list, one entry per PR, each independently mergeable:
+**PR stack format.** A numbered list, one entry per PR, each independently mergeable. As few PRs as can ship, usually 1–3 per milestone: a PR is a slice you can use once it merges, holding its schema, rules, routes, screens and tests together; cut only where shipping a part earlier lets you use it sooner, or where a design risk deserves its own merge. Never one PR per layer or per concern.
 
 ```
 1. **<PR title>** — `feat/<slug>` — one short sentence on what it contains.
