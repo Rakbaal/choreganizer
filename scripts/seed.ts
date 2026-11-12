@@ -44,9 +44,9 @@ const seedRooms = await db.insert(rooms).values(
   ['Cuisine', 'Salon', 'Salle de bain', 'Chambre', 'Entrée'].map((name, position) => ({ apartmentId: SEED_APARTMENT_ID, name, position })),
 ).returning()
 const seedTasks = await db.insert(tasks).values([
-  { apartmentId: SEED_APARTMENT_ID, name: 'Passer le balai', allRooms: true, frequencyInterval: 1, frequencyUnit: 'week' as const, position: 0 },
-  { apartmentId: SEED_APARTMENT_ID, name: 'Nettoyer les vitres', allRooms: false, frequencyInterval: 1, frequencyUnit: 'month' as const, position: 1 },
-  { apartmentId: SEED_APARTMENT_ID, name: 'Sortir les poubelles', allRooms: true, position: 2 },
+  { apartmentId: SEED_APARTMENT_ID, name: 'Passer le balai', roomScope: 'all' as const, frequencyInterval: 1, frequencyUnit: 'week' as const, position: 0 },
+  { apartmentId: SEED_APARTMENT_ID, name: 'Nettoyer les vitres', roomScope: 'some' as const, frequencyInterval: 1, frequencyUnit: 'month' as const, position: 1 },
+  { apartmentId: SEED_APARTMENT_ID, name: 'Sortir les poubelles', roomScope: 'all' as const, position: 2 },
 ]).returning()
 const vitres = seedTasks.find(task => task.name === 'Nettoyer les vitres')!
 await db.insert(taskRooms).values(

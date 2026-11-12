@@ -15,7 +15,7 @@ watch(tasks, (list) => {
 const archived = computed(() => tasks.value?.filter(task => task.archivedAt) ?? [])
 
 function roomsLabel(task: Task) {
-  if (task.allRooms) return 'Partout'
+  if (task.roomScope === 'all') return 'Partout'
   return task.rooms.map(room => room.name).join(', ')
 }
 
@@ -97,7 +97,7 @@ async function restore(task: Task) {
           <span class="text-sm text-muted">
             {{ frequencyLabel(task.frequency) }} ·
             <span
-              v-if="!task.allRooms && !task.rooms.length"
+              v-if="task.roomScope === 'some' && !task.rooms.length"
               class="text-warning"
             >Aucune pièce active</span>
             <template v-else>{{ roomsLabel(task) }}</template>

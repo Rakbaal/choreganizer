@@ -14,17 +14,24 @@ const state = reactive<TaskInput>(props.task
       name: props.task.name,
       description: props.task.description ?? '',
       frequency: props.task.frequency && { ...props.task.frequency },
-      allRooms: props.task.allRooms,
+      roomScope: props.task.roomScope,
       roomIds: props.task.rooms.map(room => room.id),
     }
-  : { name: '', description: '', frequency: null, allRooms: true, roomIds: [] })
+  : { name: '', description: '', frequency: null, roomScope: 'all', roomIds: [] })
 
 // With no active room the switch is disabled, so an edit that kept « Partout » off could never be saved. Saving turns a
 // room-specific task into « Partout »; its archived rooms' rows stay, so once a room is restored, switching « Partout »
 // off finds it ticked.
 watch(activeRooms, (list) => {
-  if (!list.length) state.allRooms = true
+  if (!list.length) state.roomScope = 'all'
 }, { immediate: true })
+
+const allRooms = computed({
+  get: () => state.roomScope === 'all',
+  set: (value: boolean) => {
+    state.roomScope = value ? 'all' : 'some'
+  },
+})
 
 // Reka's Select refuses an empty value, hence 'none' for « Au besoin ».
 const unit = computed({
@@ -101,12 +108,12 @@ const units = [
     >
       <div class="flex flex-col gap-3">
         <USwitch
-          v-model="state.allRooms"
+          v-model="allRooms"
           label="Partout"
           :disabled="!activeRooms.length"
         />
         <UCheckboxGroup
-          v-if="!state.allRooms"
+          v-if="!allRooms"
           v-model="state.roomIds"
           :items="activeRooms"
           value-key="id"

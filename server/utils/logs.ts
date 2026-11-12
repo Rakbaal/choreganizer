@@ -11,20 +11,20 @@ import type { Tx } from './tasks'
 // session's, the only source of done_by (Log only for yourself).
 export async function createLog(input: LogInput, ctx: { apartmentId: string, userId: string }): Promise<LogEntry> {
   const [task] = await db
-    .select({ id: tasks.id, allRooms: tasks.allRooms })
+    .select({ id: tasks.id, roomScope: tasks.roomScope })
     .from(tasks)
     .where(and(eq(tasks.id, input.taskId), eq(tasks.apartmentId, ctx.apartmentId), isNull(tasks.archivedAt)))
   // Unknown, another apartment's and archived alike: nothing to probe.
   if (!task) throw createError({ statusCode: 400, message: 'Cette tâche n\'existe pas ou a été archivée.' })
 
   const roomIds = [...new Set(input.roomIds)]
-  if (!task.allRooms && !roomIds.length) {
+  if (task.roomScope === 'some' && !roomIds.length) {
     throw createError({ statusCode: 400, message: 'Choisissez au moins une pièce.' })
   }
   if (roomIds.length) {
-    // The eligible rooms among the given ones: every active room of the apartment for an allRooms task, the task's
+    // The eligible rooms among the given ones: every active room of the apartment for an 'all' task, the task's
     // active rooms otherwise (the reading of activeTaskRooms).
-    const eligible = task.allRooms
+    const eligible = task.roomScope === 'all'
       ? await db
           .select({ id: rooms.id })
           .from(rooms)

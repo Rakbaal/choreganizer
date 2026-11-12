@@ -12,7 +12,7 @@ export function taskColumns(input: TaskInput) {
   return {
     name: input.name,
     description: input.description || null,
-    allRooms: input.allRooms,
+    roomScope: input.roomScope,
     frequencyInterval: input.frequency?.interval ?? null,
     frequencyUnit: input.frequency?.unit ?? null,
   }
@@ -32,7 +32,7 @@ export async function setTaskRooms(tx: Tx, task: { id: string, apartmentId: stri
       throw createError({ statusCode: 400, message: 'Une des pièces n\'existe pas ou a été archivée.' })
     }
   }
-  // notInArray on [] is true: an allRooms save drops every active row.
+  // notInArray on [] is true: a save with no room drops every active row.
   await tx.delete(taskRooms).where(and(
     eq(taskRooms.taskId, task.id),
     notInArray(taskRooms.roomId, ids),
@@ -84,7 +84,7 @@ export function toTask(row: typeof tasks.$inferSelect, rooms: { id: string, name
     name: row.name,
     description: row.description,
     frequency: row.frequencyUnit ? { interval: row.frequencyInterval!, unit: row.frequencyUnit } : null,
-    allRooms: row.allRooms,
+    roomScope: row.roomScope,
     rooms,
     lastLog,
     position: row.position,
