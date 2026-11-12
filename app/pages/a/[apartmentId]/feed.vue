@@ -207,11 +207,13 @@ const roomItems = computed(() => [
                 >
                   <span :class="muted(room.archived)">{{ room.name }}</span>{{ index < entry.rooms.length - 1 ? ', ' : '' }}
                 </template>
+                ·
               </template>
-              <template v-else>
-                Tout l'appartement
+              <!-- No room segment at all for a task with no room (Tasks with no room). -->
+              <template v-else-if="entry.task.roomScope !== 'none'">
+                Tout l'appartement ·
               </template>
-              · {{ timeOfDay(entry.doneAt, timeZone) }}
+              {{ timeOfDay(entry.doneAt, timeZone) }}
             </p>
             <p
               v-if="entry.note"

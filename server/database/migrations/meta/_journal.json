@@ -43,6 +43,27 @@
       "when": 1794164007340,
       "tag": "0005_handy_wrecker",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794517871808,
+      "tag": "0006_sour_otto_octavius",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794517888778,
+      "tag": "0007_room_scope_backfill",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794517905945,
+      "tag": "0008_greedy_stryfe",
+      "breakpoints": true
     }
   ]
 }

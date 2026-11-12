@@ -1,5 +1,7 @@
 import { eq } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
+// Relative, not #shared: plain Vitest has no alias, and taskSchema is a value import.
+import { taskSchema } from '../../shared/schemas/tasks'
 import { rooms, taskRooms } from '../database/schema'
 import { db } from '../utils/db'
 import { isUniqueViolation } from '../utils/db-errors'
@@ -79,7 +81,7 @@ describe('setTaskRooms', () => {
     const apartment = await setup()
     const cuisine = await createRoom(apartment.id, 'Cuisine')
     const chambre = await createRoom(apartment.id, 'Chambre', { archived: true })
-    const task = await createTask(apartment.id, 'Balai', { allRooms: true, roomIds: [cuisine.id, chambre.id] })
+    const task = await createTask(apartment.id, 'Balai', { roomScope: 'all', roomIds: [cuisine.id, chambre.id] })
 
     await save(task, [])
 
@@ -118,7 +120,7 @@ describe('lastLogs', () => {
     const bob = await createUser('Bob')
     const apartment = await createApartment(alice.id)
     await addMember(apartment.id, bob.id)
-    const task = await createTask(apartment.id, 'Balai', { allRooms: true })
+    const task = await createTask(apartment.id, 'Balai', { roomScope: 'all' })
     const today = new Date()
     await log(apartment.id, alice.id, task.id, today)
     await log(apartment.id, bob.id, task.id, new Date(today.getTime() - 48 * hour))
@@ -133,9 +135,9 @@ describe('lastLogs', () => {
     const bob = await createUser('Bob')
     const apartment = await createApartment(alice.id)
     await addMember(apartment.id, bob.id)
-    const balai = await createTask(apartment.id, 'Balai', { allRooms: true })
-    const vitres = await createTask(apartment.id, 'Vitres', { allRooms: true })
-    const poubelles = await createTask(apartment.id, 'Poubelles', { allRooms: true })
+    const balai = await createTask(apartment.id, 'Balai', { roomScope: 'all' })
+    const vitres = await createTask(apartment.id, 'Vitres', { roomScope: 'all' })
+    const poubelles = await createTask(apartment.id, 'Poubelles', { roomScope: 'all' })
     const yesterday = new Date(Date.now() - 24 * hour)
     const threeDaysAgo = new Date(Date.now() - 72 * hour)
     await log(apartment.id, alice.id, balai.id, yesterday)
@@ -146,5 +148,27 @@ describe('lastLogs', () => {
     expect(last.get(balai.id)).toEqual({ doneAt: yesterday.toISOString(), by: { id: alice.id, name: 'Alice' } })
     expect(last.get(vitres.id)).toEqual({ doneAt: threeDaysAgo.toISOString(), by: { id: bob.id, name: 'Bob' } })
     expect(last.has(poubelles.id)).toBe(false)
+  })
+})
+
+describe('taskSchema', () => {
+  const valid = { name: 'Balai', description: '', frequency: null, roomScope: 'all', roomIds: [] }
+
+  it('refuses « Certaines pièces » with no room', () => {
+    const result = taskSchema.safeParse({ ...valid, roomScope: 'some' })
+
+    expect(result.success).toBe(false)
+    expect(result.error?.issues[0]?.message).toBe('Choisissez au moins une pièce.')
+  })
+
+  it('accepts « Partout » and « Aucune pièce » with no room, and keeps the rooms sent', () => {
+    const roomId = '00000000-0000-4000-8000-000000000001'
+
+    expect(taskSchema.safeParse(valid).success).toBe(true)
+    expect(taskSchema.parse({ ...valid, roomScope: 'none', roomIds: [roomId] }).roomIds).toEqual([roomId])
+  })
+
+  it('refuses an unknown scope', () => {
+    expect(taskSchema.safeParse({ ...valid, roomScope: 'kitchen' }).success).toBe(false)
   })
 })

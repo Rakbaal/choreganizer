@@ -27,14 +27,16 @@ useRefreshOnFocus(() => {
   refreshRooms()
 })
 
-// Mirrors the server's rule (createLog): every active room for an « all rooms » task, the task's active rooms otherwise.
+// Mirrors the server's rule (createLog): every active room for « Partout », the task's active rooms for « Certaines
+// pièces », none for « Aucune pièce ».
 function eligibleRooms(task: Task) {
-  return task.allRooms ? activeRooms.value : task.rooms
+  if (task.roomScope === 'all') return activeRooms.value
+  return task.roomScope === 'some' ? task.rooms : []
 }
 
 // Its rooms are all archived: fixed from the Tasks screen, and kept visible so it doesn't vanish without a word.
 function isDisabled(task: Task) {
-  return !task.allRooms && !task.rooms.length
+  return task.roomScope === 'some' && !task.rooms.length
 }
 
 function line(task: Task) {
@@ -54,8 +56,9 @@ function tap(task: Task) {
   if (at - (lastTap.get(task.id) ?? 0) < 1000) return
   lastTap.set(task.id, at)
   const eligible = eligibleRooms(task)
-  if (task.allRooms && eligible.length <= 1) return quickLog.log(task, [])
-  if (!task.allRooms && eligible.length === 1) return quickLog.log(task, [eligible[0]!.id])
+  if (task.roomScope === 'none') return quickLog.log(task, [])
+  if (task.roomScope === 'all' && eligible.length <= 1) return quickLog.log(task, [])
+  if (task.roomScope === 'some' && eligible.length === 1) return quickLog.log(task, [eligible[0]!.id])
   sheetTask.value = task
   sheetOpen.value = true
 }

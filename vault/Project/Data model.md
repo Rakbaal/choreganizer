@@ -33,10 +33,10 @@ Rooms and tasks meet through `task_rooms`; a log points at one task, a person, a
 | `memberships` | Who belongs to which apartment | Many-to-many; `role` owner / member |
 | `invites` | Single-use join codes | Expires after 7 days; records who used it |
 | `rooms` | Rooms of one apartment | `position` for ordering, `archived_at`; name unique among active rooms |
-| `tasks` | Chores of one apartment | Frequency + `all_rooms` flag ([[All-rooms flag]]), `position` for the Home order ([[Manual task order]]), `archived_at`; name unique among active tasks |
-| `task_rooms` | Which rooms a task applies to | Ignored when `all_rooms` is true |
+| `tasks` | Chores of one apartment | Frequency + `room_scope` (`all`, `some` or `none`, see [[Tasks with no room]]; it replaced [[All-rooms flag|the `all_rooms` flag]]), `position` for the Home order ([[Manual task order]]), `archived_at`; name unique among active tasks |
+| `task_rooms` | Which rooms a task applies to | Read only when `room_scope` is `some` |
 | `logs` | One completion of a task | `done_by` (always the person who logged it, see [[Log only for yourself]]), `done_at`, optional note |
-| `log_rooms` | Which rooms a log covered | Zero rows = whole apartment, only for "anywhere" tasks ([[Rooms when logging]], [[Room-specific logs need a room]]) |
+| `log_rooms` | Which rooms a log covered | Zero rows = no room for a `none` task, whole apartment otherwise (a `some` task gets none from new logs, but keeps those from when it was `all`) ([[Rooms when logging]], [[Room-specific logs need a room]], [[Tasks with no room]]) |
 
 ## Postgres schema
 
@@ -86,7 +86,7 @@ create table tasks (
   apartment_id       uuid not null references apartments(id) on delete cascade,
   name               text not null,
   description        text,
-  all_rooms          boolean not null default false,
+  room_scope         text    not null default 'some' check (room_scope in ('all','some','none')),
   position           int     not null default 0,
   frequency_interval int,      -- e.g. 1, 2, 3
   frequency_unit     text,     -- 'day' | 'week' | 'month'; both null = "as needed"
@@ -128,8 +128,8 @@ create table log_rooms (
 The database can't enforce these:
 
 - A task's rooms, a log's task and a log's rooms all belong to the same apartment
-- A log's rooms are among the task's eligible rooms (all active rooms if `all_rooms`, else `task_rooms`)
-- A log of a room-specific task (`all_rooms` false) names at least one room ([[Room-specific logs need a room]])
+- A log's rooms are among the task's eligible rooms (all active rooms for `all`, `task_rooms` for `some`, none for `none`)
+- A log of a room-specific task (`some`) names at least one room ([[Room-specific logs need a room]]); a log of a no-room task (`none`) names none ([[Tasks with no room]])
 - `done_by` is the session user, never taken from the request
 - Archived tasks and rooms can't receive new logs, but still show in the feed ([[Archive, never delete]])
 

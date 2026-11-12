@@ -1,5 +1,5 @@
 // Explicit imports, not Nitro's auto-imports: the tests load this file with plain Vitest.
-import { and, asc, desc, eq, exists, inArray, isNull, notExists, or, sql, type SQL } from 'drizzle-orm'
+import { and, asc, desc, eq, exists, inArray, isNull, ne, notExists, or, sql, type SQL } from 'drizzle-orm'
 import { createError } from 'h3'
 import type { FeedQuery, LogInput } from '#shared/schemas/logs'
 import type { LogEntry, LogPage } from '#shared/types/logs'
@@ -11,20 +11,24 @@ import type { Tx } from './tasks'
 // session's, the only source of done_by (Log only for yourself).
 export async function createLog(input: LogInput, ctx: { apartmentId: string, userId: string }): Promise<LogEntry> {
   const [task] = await db
-    .select({ id: tasks.id, allRooms: tasks.allRooms })
+    .select({ id: tasks.id, roomScope: tasks.roomScope })
     .from(tasks)
     .where(and(eq(tasks.id, input.taskId), eq(tasks.apartmentId, ctx.apartmentId), isNull(tasks.archivedAt)))
   // Unknown, another apartment's and archived alike: nothing to probe.
   if (!task) throw createError({ statusCode: 400, message: 'Cette tâche n\'existe pas ou a été archivée.' })
 
   const roomIds = [...new Set(input.roomIds)]
-  if (!task.allRooms && !roomIds.length) {
+  // Tasks with no room: none, ever.
+  if (task.roomScope === 'none' && roomIds.length) {
+    throw createError({ statusCode: 400, message: 'Cette tâche ne se fait dans aucune pièce.' })
+  }
+  if (task.roomScope === 'some' && !roomIds.length) {
     throw createError({ statusCode: 400, message: 'Choisissez au moins une pièce.' })
   }
   if (roomIds.length) {
-    // The eligible rooms among the given ones: every active room of the apartment for an allRooms task, the task's
+    // The eligible rooms among the given ones: every active room of the apartment for an 'all' task, the task's
     // active rooms otherwise (the reading of activeTaskRooms).
-    const eligible = task.allRooms
+    const eligible = task.roomScope === 'all'
       ? await db
           .select({ id: rooms.id })
           .from(rooms)
@@ -74,10 +78,14 @@ export async function listLogs(apartmentId: string, filters: FeedQuery, pageSize
   if (filters.userId) conditions.push(eq(logs.doneBy, filters.userId))
   if (filters.taskId) conditions.push(eq(logs.taskId, filters.taskId))
   if (filters.roomId) {
-    // Room filter includes whole-flat logs: that room's logs, plus the logs with no room.
+    // Room filter includes whole-flat logs: that room's logs, plus the logs with no room, unless their task has none
+    // (Tasks with no room). A task switched from 'all' to 'some' keeps its whole-flat logs.
     conditions.push(or(
       exists(db.select().from(logRooms).where(and(eq(logRooms.logId, logs.id), eq(logRooms.roomId, filters.roomId)))),
-      notExists(db.select().from(logRooms).where(eq(logRooms.logId, logs.id))),
+      and(
+        notExists(db.select().from(logRooms).where(eq(logRooms.logId, logs.id))),
+        exists(db.select().from(tasks).where(and(eq(tasks.id, logs.taskId), ne(tasks.roomScope, 'none')))),
+      ),
     )!)
   }
   // Plain desc(), as logs_feed_idx is ordered: one more row than the page tells whether another page exists.
@@ -118,6 +126,7 @@ export async function logEntries(executor: Tx | typeof db, logIds: string[]): Pr
       taskId: tasks.id,
       taskName: tasks.name,
       taskArchivedAt: tasks.archivedAt,
+      taskRoomScope: tasks.roomScope,
     })
     .from(logs)
     .innerJoin(tasks, eq(tasks.id, logs.taskId))
@@ -143,7 +152,7 @@ export async function logEntries(executor: Tx | typeof db, logIds: string[]): Pr
     doneAt: row.doneAt.toISOString(),
     note: row.note,
     by: { id: row.byId, name: row.byName },
-    task: { id: row.taskId, name: row.taskName, archived: row.taskArchivedAt !== null },
+    task: { id: row.taskId, name: row.taskName, archived: row.taskArchivedAt !== null, roomScope: row.taskRoomScope },
     rooms: roomsByLog.get(row.id) ?? [],
   }))
 }

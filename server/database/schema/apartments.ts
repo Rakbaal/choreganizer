@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import { boolean, check, index, integer, pgTable, primaryKey, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core'
+import { check, index, integer, pgTable, primaryKey, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core'
 import { user } from './auth'
 
 export const apartments = pgTable('apartments', {
@@ -36,7 +36,8 @@ export const tasks = pgTable('tasks', {
   apartmentId: uuid('apartment_id').notNull().references(() => apartments.id, { onDelete: 'cascade' }),
   name: text().notNull(),
   description: text(),
-  allRooms: boolean('all_rooms').notNull().default(false),
+  // Tasks with no room: every active room, the task's task_rooms, or no room at all.
+  roomScope: text('room_scope', { enum: ['all', 'some', 'none'] }).notNull().default('some'),
   position: integer().notNull().default(0),
   frequencyInterval: integer('frequency_interval'),
   frequencyUnit: text('frequency_unit', { enum: ['day', 'week', 'month'] }),
@@ -48,9 +49,10 @@ export const tasks = pgTable('tasks', {
   check('tasks_frequency_pair_check', sql`(${t.frequencyInterval} is null) = (${t.frequencyUnit} is null)`),
   check('tasks_frequency_interval_check', sql`${t.frequencyInterval} is null or ${t.frequencyInterval} between 1 and 365`),
   check('tasks_frequency_unit_check', sql`${t.frequencyUnit} is null or ${t.frequencyUnit} in ('day', 'week', 'month')`),
+  check('tasks_room_scope_check', sql`${t.roomScope} in ('all', 'some', 'none')`),
 ])
 
-// Ignored when the task's all_rooms is set. Rows of archived rooms stay, so restoring a room puts it back in its tasks.
+// Read only when the task's room_scope is 'some'. Rows of archived rooms stay, so restoring a room puts it back in its tasks.
 export const taskRooms = pgTable('task_rooms', {
   taskId: uuid('task_id').notNull().references(() => tasks.id, { onDelete: 'cascade' }),
   roomId: uuid('room_id').notNull().references(() => rooms.id, { onDelete: 'cascade' }),
@@ -72,7 +74,7 @@ export const logs = pgTable('logs', {
   check('logs_note_length_check', sql`${t.note} is null or length(${t.note}) <= 500`),
 ])
 
-// No rows: the whole flat (only for a task with all_rooms set).
+// No rows: no room for a 'none' task, the whole flat otherwise (a 'some' task only has such logs from when it was 'all').
 export const logRooms = pgTable('log_rooms', {
   logId: uuid('log_id').notNull().references(() => logs.id, { onDelete: 'cascade' }),
   roomId: uuid('room_id').notNull().references(() => rooms.id),

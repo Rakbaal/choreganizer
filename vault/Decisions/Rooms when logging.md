@@ -19,7 +19,7 @@ Optional, several allowed; zero rooms means "the whole flat".
 
 ## Consequences
 
-`log_rooms` with zero rows = whole apartment. This applies to "anywhere" tasks only; room-specific tasks need a room ([[Room-specific logs need a room]]). The quick-log sheet shows room chips plus "Whole flat" ([[Screens#The quick-log flow]]).
+`log_rooms` with zero rows = whole apartment. This applies to "anywhere" tasks only (a no-room task also has zero rows, but they mean "no room", see [[Tasks with no room]]); room-specific tasks need a room ([[Room-specific logs need a room]]). The quick-log sheet shows room chips plus "Whole flat" ([[Screens#The quick-log flow]]).
 
 ## Related
 

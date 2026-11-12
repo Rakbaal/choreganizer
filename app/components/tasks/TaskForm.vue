@@ -8,23 +8,29 @@ const { apartment } = useApartment()
 const { data: rooms } = await useFetch(() => `/api/apartments/${apartment.value?.id}/rooms`)
 const activeRooms = computed(() => rooms.value?.filter(room => !room.archivedAt) ?? [])
 
-// « Partout » on for a new task: the common case needs no tick.
+// « Partout » for a new task: the common case needs no tick.
 const state = reactive<TaskInput>(props.task
   ? {
       name: props.task.name,
       description: props.task.description ?? '',
       frequency: props.task.frequency && { ...props.task.frequency },
-      allRooms: props.task.allRooms,
+      roomScope: props.task.roomScope,
       roomIds: props.task.rooms.map(room => room.id),
     }
-  : { name: '', description: '', frequency: null, allRooms: true, roomIds: [] })
+  : { name: '', description: '', frequency: null, roomScope: 'all', roomIds: [] })
 
-// With no active room the switch is disabled, so an edit that kept « Partout » off could never be saved. Saving turns a
-// room-specific task into « Partout »; its archived rooms' rows stay, so once a room is restored, switching « Partout »
-// off finds it ticked.
+// With no active room « Certaines pièces » is disabled, so an edit that kept it could never be saved. Saving turns a
+// room-specific task into « Partout »; its archived rooms' rows stay, so once a room is restored, choosing « Certaines
+// pièces » again finds it ticked.
 watch(activeRooms, (list) => {
-  if (!list.length) state.allRooms = true
+  if (!list.length && state.roomScope === 'some') state.roomScope = 'all'
 }, { immediate: true })
+
+const scopes = computed(() => [
+  { label: 'Partout', value: 'all' },
+  { label: 'Certaines pièces', value: 'some', disabled: !activeRooms.value.length },
+  { label: 'Aucune pièce', value: 'none' },
+])
 
 // Reka's Select refuses an empty value, hence 'none' for « Au besoin ».
 const unit = computed({
@@ -100,13 +106,13 @@ const units = [
       name="roomIds"
     >
       <div class="flex flex-col gap-3">
-        <USwitch
-          v-model="state.allRooms"
-          label="Partout"
-          :disabled="!activeRooms.length"
+        <URadioGroup
+          v-model="state.roomScope"
+          :items="scopes"
+          aria-label="Pièces"
         />
         <UCheckboxGroup
-          v-if="!state.allRooms"
+          v-if="state.roomScope === 'some'"
           v-model="state.roomIds"
           :items="activeRooms"
           value-key="id"

@@ -1,0 +1,2 @@
+ALTER TABLE "tasks" ADD COLUMN "room_scope" text DEFAULT 'some' NOT NULL;--> statement-breakpoint
+ALTER TABLE "tasks" ADD CONSTRAINT "tasks_room_scope_check" CHECK ("tasks"."room_scope" in ('all', 'some', 'none'));

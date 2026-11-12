@@ -25,7 +25,7 @@ function pick(roomIds: string[]) {
 
 // « Tout l'appartement » logs the whole flat (no room); « Toutes » every room of a room-specific task.
 function pickAll() {
-  pick(props.task?.allRooms ? [] : props.rooms.map(room => room.id))
+  pick(props.task?.roomScope === 'all' ? [] : props.rooms.map(room => room.id))
 }
 
 function toggle(roomId: string) {
@@ -55,7 +55,7 @@ function validate() {
             size="xl"
             @click="pickAll"
           >
-            {{ task?.allRooms ? 'Tout l\'appartement' : 'Toutes' }}
+            {{ task?.roomScope === 'all' ? 'Tout l\'appartement' : 'Toutes' }}
           </UButton>
           <UButton
             v-for="room in rooms"

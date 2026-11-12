@@ -28,7 +28,7 @@ describe('createLog', () => {
   it('refuses a task of another apartment', async () => {
     const ctx = await setup()
     const other = await setup()
-    const foreign = await createTask(other.apartment.id, 'Balai', { allRooms: true })
+    const foreign = await createTask(other.apartment.id, 'Balai', { roomScope: 'all' })
 
     await expect(log(ctx, foreign.id)).rejects.toMatchObject({ statusCode: 400 })
     expect(await logCount(ctx.apartment.id)).toBe(0)
@@ -37,7 +37,7 @@ describe('createLog', () => {
 
   it('refuses an archived task', async () => {
     const ctx = await setup()
-    const task = await createTask(ctx.apartment.id, 'Balai', { allRooms: true, archived: true })
+    const task = await createTask(ctx.apartment.id, 'Balai', { roomScope: 'all', archived: true })
 
     await expect(log(ctx, task.id)).rejects.toMatchObject({
       statusCode: 400,
@@ -50,7 +50,7 @@ describe('createLog', () => {
     const ctx = await setup()
     const other = await setup()
     const foreign = await createRoom(other.apartment.id, 'Cuisine')
-    const task = await createTask(ctx.apartment.id, 'Balai', { allRooms: true })
+    const task = await createTask(ctx.apartment.id, 'Balai', { roomScope: 'all' })
 
     await expect(log(ctx, task.id, [foreign.id])).rejects.toMatchObject({ statusCode: 400 })
     expect(await logCount(ctx.apartment.id)).toBe(0)
@@ -69,10 +69,10 @@ describe('createLog', () => {
     expect(await logCount(ctx.apartment.id)).toBe(0)
   })
 
-  it('refuses an archived room on an allRooms task', async () => {
+  it('refuses an archived room on a « Partout » task', async () => {
     const ctx = await setup()
     const archived = await createRoom(ctx.apartment.id, 'Chambre', { archived: true })
-    const task = await createTask(ctx.apartment.id, 'Balai', { allRooms: true })
+    const task = await createTask(ctx.apartment.id, 'Balai', { roomScope: 'all' })
 
     await expect(log(ctx, task.id, [archived.id])).rejects.toMatchObject({ statusCode: 400 })
     expect(await logCount(ctx.apartment.id)).toBe(0)
@@ -100,23 +100,47 @@ describe('createLog', () => {
     expect(await logCount(ctx.apartment.id)).toBe(0)
   })
 
-  it('logs an allRooms task with no room as the whole flat', async () => {
+  it('logs a « Partout » task with no room as the whole flat', async () => {
     const ctx = await setup()
     await createRoom(ctx.apartment.id, 'Cuisine')
-    const task = await createTask(ctx.apartment.id, 'Balai', { allRooms: true })
+    const task = await createTask(ctx.apartment.id, 'Balai', { roomScope: 'all' })
 
     const entry = await log(ctx, task.id)
 
     expect(entry.rooms).toEqual([])
-    expect(entry.task).toEqual({ id: task.id, name: 'Balai', archived: false })
+    expect(entry.task).toEqual({ id: task.id, name: 'Balai', archived: false, roomScope: 'all' })
     expect(await db.select().from(logRooms).where(eq(logRooms.logId, entry.id))).toEqual([])
     expect(await logCount(ctx.apartment.id)).toBe(1)
   })
 
-  it('logs an allRooms task in any active room of the apartment', async () => {
+  it('logs a no-room task with no room', async () => {
+    const ctx = await setup()
+    await createRoom(ctx.apartment.id, 'Cuisine')
+    const task = await createTask(ctx.apartment.id, 'Poubelles', { roomScope: 'none' })
+
+    const entry = await log(ctx, task.id)
+
+    expect(entry.rooms).toEqual([])
+    expect(entry.task.roomScope).toBe('none')
+    expect(await db.select().from(logRooms).where(eq(logRooms.logId, entry.id))).toEqual([])
+  })
+
+  it('refuses any room for a no-room task', async () => {
     const ctx = await setup()
     const cuisine = await createRoom(ctx.apartment.id, 'Cuisine')
-    const task = await createTask(ctx.apartment.id, 'Balai', { allRooms: true })
+    const task = await createTask(ctx.apartment.id, 'Poubelles', { roomScope: 'none', roomIds: [cuisine.id] })
+
+    await expect(log(ctx, task.id, [cuisine.id])).rejects.toMatchObject({
+      statusCode: 400,
+      message: 'Cette tâche ne se fait dans aucune pièce.',
+    })
+    expect(await logCount(ctx.apartment.id)).toBe(0)
+  })
+
+  it('logs a « Partout » task in any active room of the apartment', async () => {
+    const ctx = await setup()
+    const cuisine = await createRoom(ctx.apartment.id, 'Cuisine')
+    const task = await createTask(ctx.apartment.id, 'Balai', { roomScope: 'all' })
 
     const entry = await log(ctx, task.id, [cuisine.id])
 
@@ -137,7 +161,7 @@ describe('createLog', () => {
 
   it('sets done_by to the user passed in, with the note and date given', async () => {
     const ctx = await setup()
-    const task = await createTask(ctx.apartment.id, 'Balai', { allRooms: true })
+    const task = await createTask(ctx.apartment.id, 'Balai', { roomScope: 'all' })
     const doneAt = '2026-01-15T19:40:00.123+01:00'
 
     const entry = await createLog(
@@ -154,7 +178,7 @@ describe('createLog', () => {
 
   it('stores an empty note as null', async () => {
     const ctx = await setup()
-    const task = await createTask(ctx.apartment.id, 'Balai', { allRooms: true })
+    const task = await createTask(ctx.apartment.id, 'Balai', { roomScope: 'all' })
 
     const entry = await createLog(
       { taskId: task.id, roomIds: [], doneAt: new Date().toISOString(), note: '' },
@@ -207,7 +231,7 @@ describe('listLogs', () => {
     const { user, apartment } = await setup()
     const cuisine = await createRoom(apartment.id, 'Cuisine')
     const salon = await createRoom(apartment.id, 'Salon')
-    const task = await createTask(apartment.id, 'Balai', { allRooms: true })
+    const task = await createTask(apartment.id, 'Balai', { roomScope: 'all' })
     const wholeFlat = await insertLog(apartment.id, task.id, user.id)
     const inCuisine = await insertLog(apartment.id, task.id, user.id, { roomIds: [cuisine.id] })
     await insertLog(apartment.id, task.id, user.id, { roomIds: [salon.id] })
@@ -218,9 +242,26 @@ describe('listLogs', () => {
     expect(page.items.map(item => item.id).sort()).toEqual([wholeFlat.id, inCuisine.id, inBoth.id].sort())
   })
 
+  it('leaves a no-room task\'s logs out of a room filter, and keeps the whole-flat logs of a task now room-specific', async () => {
+    const { user, apartment } = await setup()
+    const cuisine = await createRoom(apartment.id, 'Cuisine')
+    const balai = await createTask(apartment.id, 'Balai', { roomScope: 'all' })
+    const poubelles = await createTask(apartment.id, 'Poubelles', { roomScope: 'none' })
+    // Logged whole-flat while it was « Partout », then switched to « Certaines pièces ».
+    const vitres = await createTask(apartment.id, 'Vitres', { roomScope: 'some', roomIds: [cuisine.id] })
+    const balaiLog = await insertLog(apartment.id, balai.id, user.id)
+    await insertLog(apartment.id, poubelles.id, user.id)
+    const vitresLog = await insertLog(apartment.id, vitres.id, user.id)
+
+    const page = await listLogs(apartment.id, { roomId: cuisine.id })
+
+    expect(page.items.map(item => item.id).sort()).toEqual([balaiLog.id, vitresLog.id].sort())
+    expect((await listLogs(apartment.id, {})).items).toHaveLength(3)
+  })
+
   it('walks three pages of logs sharing one done_at with no duplicate and no gap', async () => {
     const { user, apartment } = await setup()
-    const task = await createTask(apartment.id, 'Balai', { allRooms: true })
+    const task = await createTask(apartment.id, 'Balai', { roomScope: 'all' })
     const doneAt = new Date('2026-11-07T18:40:00.123Z')
     const ids = []
     for (let i = 0; i < 5; i++) ids.push((await insertLog(apartment.id, task.id, user.id, { doneAt })).id)
@@ -243,13 +284,13 @@ describe('listLogs', () => {
     const { user: alice, apartment } = await setup()
     const bob = await createUser('Bob')
     await addMember(apartment.id, bob.id)
-    const balai = await createTask(apartment.id, 'Balai', { allRooms: true })
-    const vitres = await createTask(apartment.id, 'Vitres', { allRooms: true })
+    const balai = await createTask(apartment.id, 'Balai', { roomScope: 'all' })
+    const vitres = await createTask(apartment.id, 'Vitres', { roomScope: 'all' })
     const bobsBalai = await insertLog(apartment.id, balai.id, bob.id)
     await insertLog(apartment.id, balai.id, alice.id)
     await insertLog(apartment.id, vitres.id, bob.id)
     const other = await setup()
-    const otherTask = await createTask(other.apartment.id, 'Balai', { allRooms: true })
+    const otherTask = await createTask(other.apartment.id, 'Balai', { roomScope: 'all' })
     await insertLog(other.apartment.id, otherTask.id, other.user.id)
 
     const page = await listLogs(apartment.id, { userId: bob.id, taskId: balai.id })
@@ -283,7 +324,7 @@ describe('logAuthors', () => {
     const { user: alice, apartment } = await setup()
     const bob = await createUser('Bob')
     await addMember(apartment.id, bob.id)
-    const task = await createTask(apartment.id, 'Balai', { allRooms: true })
+    const task = await createTask(apartment.id, 'Balai', { roomScope: 'all' })
     await insertLog(apartment.id, task.id, bob.id)
     await insertLog(apartment.id, task.id, bob.id)
     await insertLog(apartment.id, task.id, alice.id)
