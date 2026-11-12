@@ -27,8 +27,9 @@ const open = computed({
 })
 const subtitle = computed(() => {
   if (!entry.value) return undefined
-  const rooms = entry.value.rooms.map(room => room.name).join(', ') || 'Tout l\'appartement'
-  return `${entry.value.by.name} · ${rooms}`
+  const rooms = entry.value.rooms.map(room => room.name).join(', ')
+    || (entry.value.task.roomScope === 'none' ? null : 'Tout l\'appartement')
+  return rooms ? `${entry.value.by.name} · ${rooms}` : entry.value.by.name
 })
 
 const state = reactive({ when: '', note: '' })

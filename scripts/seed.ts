@@ -46,7 +46,7 @@ const seedRooms = await db.insert(rooms).values(
 const seedTasks = await db.insert(tasks).values([
   { apartmentId: SEED_APARTMENT_ID, name: 'Passer le balai', roomScope: 'all' as const, frequencyInterval: 1, frequencyUnit: 'week' as const, position: 0 },
   { apartmentId: SEED_APARTMENT_ID, name: 'Nettoyer les vitres', roomScope: 'some' as const, frequencyInterval: 1, frequencyUnit: 'month' as const, position: 1 },
-  { apartmentId: SEED_APARTMENT_ID, name: 'Sortir les poubelles', roomScope: 'all' as const, position: 2 },
+  { apartmentId: SEED_APARTMENT_ID, name: 'Sortir les poubelles', roomScope: 'none' as const, position: 2 },
 ]).returning()
 const vitres = seedTasks.find(task => task.name === 'Nettoyer les vitres')!
 await db.insert(taskRooms).values(
@@ -70,7 +70,7 @@ console.log(`Seeded « Appartement de test », password « ${PASSWORD} »:
   alice@example.test (owner)
   bob@example.test (member)
   rooms: Cuisine, Salon, Salle de bain, Chambre, Entrée
-  tasks: Passer le balai (partout, chaque semaine), Nettoyer les vitres (Cuisine, Salon, chaque mois), Sortir les poubelles (partout, au besoin)
+  tasks: Passer le balai (partout, chaque semaine), Nettoyer les vitres (Cuisine, Salon, chaque mois), Sortir les poubelles (aucune pièce, au besoin)
   invite: http://localhost:3000/join/invitedetest (unused, valid 7 days)
   logs: Alice Passer le balai (hier 20:00), Bob Nettoyer les vitres (il y a 3 jours, Cuisine, Salon), Alice Sortir les poubelles (il y a 2 heures)`)
 // db.ts keeps its pool open; nothing else to wait for.

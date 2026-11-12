@@ -16,6 +16,7 @@ const archived = computed(() => tasks.value?.filter(task => task.archivedAt) ?? 
 
 function roomsLabel(task: Task) {
   if (task.roomScope === 'all') return 'Partout'
+  if (task.roomScope === 'none') return 'Aucune pièce'
   return task.rooms.map(room => room.name).join(', ')
 }
 
