@@ -19,7 +19,7 @@ Written as REST routes for clarity; in Nuxt each one is a file under `server/api
 | DELETE | `/apartments/:id/members/:userId` | Leave, or remove someone (owner only) |
 | GET · POST | `/apartments/:id/rooms` | List, create |
 | PATCH | `/rooms/:id` | Rename, reorder, archive |
-| GET · POST | `/apartments/:id/tasks` | List (with eligible rooms), create with `roomIds` or `allRooms` |
+| GET · POST | `/apartments/:id/tasks` | List (with eligible rooms), create with `roomScope` (`all`, `some`, `none`) and `roomIds` |
 | PATCH | `/tasks/:id` | Edit name, frequency, rooms, position; archive |
 | POST | `/apartments/:id/logs` | Log `{taskId, roomIds?, doneAt?, note?}`; always done by me |
 | GET | `/apartments/:id/logs` | Feed; filters `userId`, `taskId`, `roomId`, `from`, `to`; cursor on `done_at` |
@@ -34,7 +34,7 @@ Write `requireMembership(event, apartmentId)` once in `server/utils/` (auto-impo
 1. Check membership
 2. Load the task (active, same apartment)
 3. Resolve eligible rooms
-4. Reject any `roomId` outside them, and an empty `roomIds` for a room-specific task
+4. Reject any `roomId` outside them, an empty `roomIds` for a room-specific task, and any `roomId` for a no-room task ([[Tasks with no room]])
 5. Set `done_by` to the session user ([[Log only for yourself]])
 6. Insert `logs` and `log_rooms` in one transaction
 

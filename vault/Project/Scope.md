@@ -13,7 +13,7 @@ The one product rule that decides whether this app gets used: **logging a chore 
 
 - **Apartments:** create, rename, archive; each has a list of rooms
 - **Members:** invite the other person to an apartment; a person can belong to several apartments (home, holiday rental)
-- **Tasks:** name, frequency (daily, weekly, every N days…), and where it applies (anywhere, or a chosen set of rooms)
+- **Tasks:** name, frequency (daily, weekly, every N days…), and where it applies (anywhere, a chosen set of rooms, or no room at all, see [[Tasks with no room]])
 - **Logs:** "I did X in room Y", timestamped now by default, editable afterwards
 - **Feed:** "Alice did *Nettoyer les vitres* in the kitchen · yesterday 19:40", newest first, filterable by person, task, room
 
