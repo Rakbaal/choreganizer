@@ -74,7 +74,7 @@ Optimistic: the button shows done at once, the request runs in the background, a
 
 - 50 logs per page; cursor = `done_at` + `id` of the last row (see [[Data model#Feed query]])
 - Person filter: the people who appear in the apartment's logs, so a removed member's logs stay filterable
-- Room filter: logs naming that room, plus whole-flat logs of « Partout » tasks ([[Room filter includes whole-flat logs]]); logs of no-room tasks never match ([[Tasks with no room]])
+- Room filter: logs naming that room, plus whole-flat logs, the zero-room logs of any task but a no-room one ([[Room filter includes whole-flat logs]]); logs of no-room tasks never match ([[Tasks with no room]])
 - Day grouping uses the apartment's timezone via `Intl.DateTimeFormat` ([[Apartment timezone]])
 - Refetch when the tab regains focus; no realtime
 

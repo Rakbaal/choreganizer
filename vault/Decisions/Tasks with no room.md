@@ -21,7 +21,7 @@ A task's rooms have three modes, one `room_scope` column on `tasks` (`all | some
 - `some`, « Certaines pièces »: the rooms in `task_rooms`, at least one per log ([[Room-specific logs need a room]])
 - `none`, « Aucune pièce »: no room, ever
 
-A no-room task is logged on the first tap, with no sheet. Its logs have no `log_rooms` rows, its feed line shows no room, and the feed's room filter leaves them out ([[Room filter includes whole-flat logs]] still holds for `all` tasks).
+A no-room task is logged on the first tap, with no sheet. Its logs have no `log_rooms` rows, its feed line shows no room, and the feed's room filter leaves them out ([[Room filter includes whole-flat logs]] still holds for the zero-room logs of every other task, so an `all` task switched to `some` keeps its whole-flat history).
 
 ## Why
 

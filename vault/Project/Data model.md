@@ -36,7 +36,7 @@ Rooms and tasks meet through `task_rooms`; a log points at one task, a person, a
 | `tasks` | Chores of one apartment | Frequency + `room_scope` (`all`, `some` or `none`, see [[Tasks with no room]]; it replaced [[All-rooms flag|the `all_rooms` flag]]), `position` for the Home order ([[Manual task order]]), `archived_at`; name unique among active tasks |
 | `task_rooms` | Which rooms a task applies to | Read only when `room_scope` is `some` |
 | `logs` | One completion of a task | `done_by` (always the person who logged it, see [[Log only for yourself]]), `done_at`, optional note |
-| `log_rooms` | Which rooms a log covered | Zero rows = whole apartment for an `all` task, no room for a `none` task, never for a `some` task ([[Rooms when logging]], [[Room-specific logs need a room]], [[Tasks with no room]]) |
+| `log_rooms` | Which rooms a log covered | Zero rows = no room for a `none` task, whole apartment otherwise (a `some` task gets none from new logs, but keeps those from when it was `all`) ([[Rooms when logging]], [[Room-specific logs need a room]], [[Tasks with no room]]) |
 
 ## Postgres schema
 
